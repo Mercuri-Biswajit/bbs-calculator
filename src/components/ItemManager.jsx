@@ -1,16 +1,8 @@
 // src/components/ItemManager.jsx
-// UPDATED: Added staircase, slab type (1-way/2-way), unit selector
+// ALL dimensions in METRES. ALL spacings in mm. No unit selector — no conversion bugs.
 
 import { useState } from "react";
-import {
-  Card,
-  CardHeader,
-  Field,
-  DiaSelect,
-  Button,
-  Badge,
-  Divider,
-} from "./ui.jsx";
+import { Card, Field, DiaSelect, Button, Badge } from "./ui.jsx";
 import {
   DrawingFooting,
   DrawingColumn,
@@ -18,22 +10,21 @@ import {
   DrawingSlab,
   DrawingStaircase,
 } from "../utils/drawings.jsx";
-import { UNITS } from "../utils/calculations.js";
 
-// ─── DEFAULT PARAMS PER TYPE ──────────────────────────────────────────────────
 export const DEFAULTS = {
   footing: {
     label: "Footing F1",
+    count: 1,
     L: "1.5",
     B: "1.5",
     D: "0.45",
     mainDia: "12",
     distDia: "12",
     spacing: "150",
-    unit: "m",
   },
   column: {
     label: "Column C1",
+    count: 1,
     H: "3",
     B: "0.3",
     D: "0.3",
@@ -41,10 +32,10 @@ export const DEFAULTS = {
     mainNos: "4",
     tieDia: "8",
     tieSpacing: "150",
-    unit: "m",
   },
   plinthBeam: {
     label: "Plinth Beam PB1",
+    count: 1,
     L: "4",
     B: "0.23",
     D: "0.45",
@@ -56,10 +47,10 @@ export const DEFAULTS = {
     exTopNos: "1",
     stirDia: "8",
     stirSpacing: "150",
-    unit: "m",
   },
   wallBeam: {
     label: "Wall Beam WB1",
+    count: 1,
     L: "4",
     B: "0.23",
     D: "0.35",
@@ -71,10 +62,10 @@ export const DEFAULTS = {
     exTopNos: "0",
     stirDia: "8",
     stirSpacing: "200",
-    unit: "m",
   },
   slab: {
     label: "Slab S1",
+    count: 1,
     L: "4",
     B: "3",
     D: "0.125",
@@ -85,10 +76,10 @@ export const DEFAULTS = {
     topDia: "8",
     topSp: "150",
     slabType: "2-way",
-    unit: "m",
   },
   staircase: {
     label: "Staircase ST1",
+    count: 1,
     flightLen: "3.5",
     width: "1.2",
     waistThick: "0.15",
@@ -96,84 +87,54 @@ export const DEFAULTS = {
     mainSp: "150",
     distDia: "8",
     distSp: "200",
-    unit: "m",
   },
 };
 
 let _id = 0;
-export const newItem = (type) => ({ id: ++_id, count: 1, ...DEFAULTS[type] });
+export const newItem = (type) => ({ id: ++_id, ...DEFAULTS[type] });
 
-// 🆕 Unit Selector Component
-function UnitSelect({ value, onChange }) {
-  return (
-    <div style={{ marginBottom: 10 }}>
-      <label
-        style={{
-          fontSize: 11,
-          color: "var(--text2)",
-          fontWeight: 600,
-          display: "block",
-          marginBottom: 4,
-          letterSpacing: 0.4,
-        }}
-      >
-        Unit
-      </label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        style={{ padding: "7px 10px" }}
-      >
-        {UNITS.map((u) => (
-          <option key={u} value={u}>
-            {u === "m"
-              ? "Meters (m)"
-              : u === "mm"
-                ? "Millimeters (mm)"
-                : u === "ft"
-                  ? "Feet (ft)"
-                  : "Inches (in)"}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
+// Shorthand field components
+const MF = ({ label, value, onChange }) => (
+  <Field
+    label={label}
+    value={value}
+    onChange={onChange}
+    unit="m"
+    step="0.01"
+    min="0"
+  />
+);
+const MMF = ({ label, value, onChange }) => (
+  <Field
+    label={label}
+    value={value}
+    onChange={onChange}
+    unit="mm"
+    step="10"
+    min="50"
+  />
+);
+const NF = ({ label, value, onChange }) => (
+  <Field
+    label={label}
+    value={value}
+    onChange={onChange}
+    unit="nos"
+    step="1"
+    min="1"
+  />
+);
 
-// ─── FOOTING FORM ─────────────────────────────────────────────────────────────
+// ─── FORMS ───────────────────────────────────────────────────────────────────
+
 function FootingForm({ item, onChange }) {
   const u = (k) => (v) => onChange(k, v);
   return (
-    <div
-      style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 14px" }}
-    >
-      <UnitSelect value={item.unit || "m"} onChange={u("unit")} />
-      <div />
-      <Field
-        label="Length L"
-        value={item.L}
-        onChange={u("L")}
-        unit={item.unit}
-      />
-      <Field
-        label="Width B"
-        value={item.B}
-        onChange={u("B")}
-        unit={item.unit}
-      />
-      <Field
-        label="Depth D"
-        value={item.D}
-        onChange={u("D")}
-        unit={item.unit}
-      />
-      <Field
-        label="Bar Spacing"
-        value={item.spacing}
-        onChange={u("spacing")}
-        unit="mm"
-        step="10"
-      />
+    <div className="form-grid">
+      <MF label="Length L" value={item.L} onChange={u("L")} />
+      <MF label="Width B" value={item.B} onChange={u("B")} />
+      <MF label="Depth D" value={item.D} onChange={u("D")} />
+      <MMF label="Bar Spacing" value={item.spacing} onChange={u("spacing")} />
       <DiaSelect
         label="Main Bar Dia"
         value={item.mainDia}
@@ -188,39 +149,17 @@ function FootingForm({ item, onChange }) {
   );
 }
 
-// ─── COLUMN FORM ──────────────────────────────────────────────────────────────
 function ColumnForm({ item, onChange }) {
   const u = (k) => (v) => onChange(k, v);
   return (
-    <div
-      style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 14px" }}
-    >
-      <UnitSelect value={item.unit || "m"} onChange={u("unit")} />
-      <div />
-      <Field
-        label="Storey Height H"
-        value={item.H}
-        onChange={u("H")}
-        unit={item.unit}
-      />
-      <Field
-        label="Width B"
-        value={item.B}
-        onChange={u("B")}
-        unit={item.unit}
-      />
-      <Field
-        label="Depth D"
-        value={item.D}
-        onChange={u("D")}
-        unit={item.unit}
-      />
-      <Field
+    <div className="form-grid">
+      <MF label="Storey Height H" value={item.H} onChange={u("H")} />
+      <MF label="Width B" value={item.B} onChange={u("B")} />
+      <MF label="Depth D" value={item.D} onChange={u("D")} />
+      <NF
         label="No. of Main Bars"
         value={item.mainNos}
         onChange={u("mainNos")}
-        unit="nos"
-        step="1"
       />
       <DiaSelect
         label="Main Bar Dia"
@@ -232,69 +171,38 @@ function ColumnForm({ item, onChange }) {
         value={item.tieDia}
         onChange={u("tieDia")}
       />
-      <Field
+      <MMF
         label="Tie Spacing"
         value={item.tieSpacing}
         onChange={u("tieSpacing")}
-        unit="mm"
-        step="10"
       />
     </div>
   );
 }
 
-// ─── BEAM FORM ────────────────────────────────────────────────────────────────
 function BeamForm({ item, onChange }) {
   const u = (k) => (v) => onChange(k, v);
   return (
-    <div
-      style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 14px" }}
-    >
-      <UnitSelect value={item.unit || "m"} onChange={u("unit")} />
-      <div />
-      <Field label="Span L" value={item.L} onChange={u("L")} unit={item.unit} />
-      <Field
-        label="Width B"
-        value={item.B}
-        onChange={u("B")}
-        unit={item.unit}
-      />
-      <Field
-        label="Depth D"
-        value={item.D}
-        onChange={u("D")}
-        unit={item.unit}
-      />
-      <Field
-        label="No. Bottom Bars"
-        value={item.botNos}
-        onChange={u("botNos")}
-        unit="nos"
-        step="1"
-      />
+    <div className="form-grid">
+      <MF label="Span L" value={item.L} onChange={u("L")} />
+      <MF label="Width B" value={item.B} onChange={u("B")} />
+      <MF label="Depth D" value={item.D} onChange={u("D")} />
+      <NF label="No. Bottom Bars" value={item.botNos} onChange={u("botNos")} />
       <DiaSelect
         label="Bottom Bar Dia"
         value={item.botDia}
         onChange={u("botDia")}
       />
-      <Field
-        label="No. Top Bars"
-        value={item.topNos}
-        onChange={u("topNos")}
-        unit="nos"
-        step="1"
-      />
+      <NF label="No. Top Bars" value={item.topNos} onChange={u("topNos")} />
       <DiaSelect
         label="Top Bar Dia"
         value={item.topDia}
         onChange={u("topDia")}
       />
-      <Field
+      <NF
         label="No. Extra Top Bars"
         value={item.exTopNos}
         onChange={u("exTopNos")}
-        unit="nos"
-        step="1"
       />
       <DiaSelect
         label="Extra Top Dia"
@@ -306,25 +214,19 @@ function BeamForm({ item, onChange }) {
         value={item.stirDia}
         onChange={u("stirDia")}
       />
-      <Field
+      <MMF
         label="Stirrup Spacing"
         value={item.stirSpacing}
         onChange={u("stirSpacing")}
-        unit="mm"
-        step="10"
       />
     </div>
   );
 }
 
-// 🆕 ─── SLAB FORM (with 1-way/2-way selection) ────────────────────────────────
 function SlabForm({ item, onChange }) {
   const u = (k) => (v) => onChange(k, v);
   return (
-    <div
-      style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 14px" }}
-    >
-      <UnitSelect value={item.unit || "m"} onChange={u("unit")} />
+    <div className="form-grid">
       <div style={{ marginBottom: 10 }}>
         <label
           style={{
@@ -343,118 +245,78 @@ function SlabForm({ item, onChange }) {
           onChange={(e) => u("slabType")(e.target.value)}
           style={{ padding: "7px 10px" }}
         >
-          <option value="1-way">1-Way Slab (Ly/Lx {">"} 2)</option>
-          <option value="2-way">2-Way Slab (Ly/Lx {"<"} 2)</option>
+          <option value="1-way">1-Way Slab (Ly/Lx &gt; 2)</option>
+          <option value="2-way">2-Way Slab (Ly/Lx &lt; 2)</option>
         </select>
       </div>
-      <Field
-        label="Span Lx"
-        value={item.L}
-        onChange={u("L")}
-        unit={item.unit}
-      />
-      <Field
-        label="Span Ly"
-        value={item.B}
-        onChange={u("B")}
-        unit={item.unit}
-      />
-      <Field
-        label="Thickness D"
-        value={item.D}
-        onChange={u("D")}
-        unit={item.unit}
-      />
+      <div />
+      <MF label="Span Lx (shorter)" value={item.L} onChange={u("L")} />
+      <MF label="Span Ly (longer)" value={item.B} onChange={u("B")} />
+      <MF label="Thickness D" value={item.D} onChange={u("D")} />
       <DiaSelect
         label="Main Bar Dia"
         value={item.mainDia}
         onChange={u("mainDia")}
       />
-      <Field
+      <MMF
         label="Main Bar Spacing"
         value={item.mainSp}
         onChange={u("mainSp")}
-        unit="mm"
-        step="10"
       />
       <DiaSelect
         label="Dist Bar Dia"
         value={item.distDia}
         onChange={u("distDia")}
       />
-      <Field
+      <MMF
         label="Dist Bar Spacing"
         value={item.distSp}
         onChange={u("distSp")}
-        unit="mm"
-        step="10"
       />
       <DiaSelect
-        label="Top Bar Dia (@supports)"
+        label="Top Bar Dia (@sup)"
         value={item.topDia}
         onChange={u("topDia")}
       />
-      <Field
-        label="Top Bar Spacing"
-        value={item.topSp}
-        onChange={u("topSp")}
-        unit="mm"
-        step="10"
-      />
+      <MMF label="Top Bar Spacing" value={item.topSp} onChange={u("topSp")} />
     </div>
   );
 }
 
-// 🆕 ─── STAIRCASE FORM ────────────────────────────────────────────────────────
 function StaircaseForm({ item, onChange }) {
   const u = (k) => (v) => onChange(k, v);
   return (
-    <div
-      style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 14px" }}
-    >
-      <UnitSelect value={item.unit || "m"} onChange={u("unit")} />
-      <div />
-      <Field
+    <div className="form-grid">
+      <MF
         label="Flight Length"
         value={item.flightLen}
         onChange={u("flightLen")}
-        unit={item.unit}
       />
-      <Field
-        label="Width"
-        value={item.width}
-        onChange={u("width")}
-        unit={item.unit}
-      />
-      <Field
+      <MF label="Width" value={item.width} onChange={u("width")} />
+      <MF
         label="Waist Thickness"
         value={item.waistThick}
         onChange={u("waistThick")}
-        unit={item.unit}
       />
       <DiaSelect
         label="Main Bar Dia"
         value={item.mainDia}
         onChange={u("mainDia")}
       />
-      <Field
+      <MMF
         label="Main Bar Spacing"
         value={item.mainSp}
         onChange={u("mainSp")}
-        unit="mm"
-        step="10"
       />
       <DiaSelect
-        label="Distribution Bar Dia"
+        label="Dist Bar Dia"
         value={item.distDia}
         onChange={u("distDia")}
       />
-      <Field
+      <MMF
         label="Dist Bar Spacing"
         value={item.distSp}
         onChange={u("distSp")}
-        unit="mm"
-        step="10"
       />
     </div>
   );
@@ -499,7 +361,7 @@ const TYPE_ICONS = {
   staircase: "🪜",
 };
 
-// ─── SINGLE ITEM CARD ─────────────────────────────────────────────────────────
+// ─── ITEM CARD ────────────────────────────────────────────────────────────────
 function ItemCard({ item, type, onChange, onRemove, index }) {
   const [showDrawing, setShowDrawing] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -509,14 +371,13 @@ function ItemCard({ item, type, onChange, onRemove, index }) {
     <Card style={{ marginBottom: 12 }} className="fade-in">
       {/* Header */}
       <div
+        className="item-hdr"
         style={{
           padding: "10px 14px",
           background: "var(--surface2)",
           borderBottom: "1px solid var(--border2)",
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
           borderRadius: "var(--radius) var(--radius) 0 0",
+          gap: 10,
         }}
       >
         <Badge label={`#${index + 1}`} color={TYPE_COLORS[type]} />
@@ -525,6 +386,7 @@ function ItemCard({ item, type, onChange, onRemove, index }) {
           onChange={(e) => onChange("label", e.target.value)}
           style={{
             flex: 1,
+            minWidth: 60,
             border: "none",
             background: "transparent",
             fontWeight: 600,
@@ -534,7 +396,6 @@ function ItemCard({ item, type, onChange, onRemove, index }) {
             fontFamily: "var(--font-sans)",
           }}
         />
-        {/* Count */}
         <div
           style={{
             display: "flex",
@@ -544,6 +405,7 @@ function ItemCard({ item, type, onChange, onRemove, index }) {
             border: "1px solid var(--border)",
             borderRadius: 6,
             padding: "3px 8px",
+            flexShrink: 0,
           }}
         >
           <span
@@ -596,22 +458,42 @@ function ItemCard({ item, type, onChange, onRemove, index }) {
         </Button>
       </div>
 
-      {/* Drawing */}
       {showDrawing && !collapsed && (
         <div
           style={{
             padding: "14px 18px",
             background: "var(--primary-light)",
             borderBottom: "1px solid var(--border2)",
+            overflowX: "auto",
           }}
         >
           {getDrawing(type, item)}
         </div>
       )}
 
-      {/* Form */}
       {!collapsed && (
         <div style={{ padding: "14px 18px" }}>
+          {/* Unit reminder */}
+          <div
+            style={{
+              marginBottom: 12,
+              padding: "7px 12px",
+              background: "#fffbe6",
+              border: "1px solid #ffe082",
+              borderRadius: 6,
+              fontSize: 11,
+              color: "#7d5000",
+              display: "flex",
+              gap: 8,
+              alignItems: "center",
+            }}
+          >
+            <span>📐</span>
+            <span>
+              <b>Dimensions → metres (m)</b> &nbsp;·&nbsp;{" "}
+              <b>Spacings → millimetres (mm)</b>
+            </span>
+          </div>
           <Form item={item} onChange={onChange} />
         </div>
       )}
@@ -631,7 +513,6 @@ export function ItemManager({ type, items, setItems }) {
       slab: "S",
       staircase: "ST",
     };
-    const item = newItem(type);
     const typeNames = {
       footing: "Footing",
       column: "Column",
@@ -640,22 +521,18 @@ export function ItemManager({ type, items, setItems }) {
       slab: "Slab",
       staircase: "Staircase",
     };
+    const item = newItem(type);
     item.label = `${typeNames[type]} ${prefixes[type]}${n}`;
     setItems((prev) => [...prev, item]);
   };
 
-  const updateItem = (id, key, value) => {
+  const updateItem = (id, key, value) =>
     setItems((prev) =>
       prev.map((it) => (it.id === id ? { ...it, [key]: value } : it)),
     );
-  };
-
-  const removeItem = (id) => {
+  const removeItem = (id) =>
     setItems((prev) => prev.filter((it) => it.id !== id));
-  };
-
   const totalCount = items.reduce((s, it) => s + (+it.count || 1), 0);
-
   const typeLabels = {
     footing: "Footings",
     column: "Columns",
@@ -667,13 +544,14 @@ export function ItemManager({ type, items, setItems }) {
 
   return (
     <div>
-      {/* Header */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           marginBottom: 14,
+          flexWrap: "wrap",
+          gap: 8,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -717,9 +595,7 @@ export function ItemManager({ type, items, setItems }) {
           <div style={{ fontWeight: 600, marginBottom: 4 }}>
             No {typeLabels[type]} added yet
           </div>
-          <div style={{ fontSize: 12 }}>
-            Click "+ Add" to start adding {typeLabels[type]} to the project
-          </div>
+          <div style={{ fontSize: 12 }}>Click "+ Add" to start</div>
         </div>
       )}
 

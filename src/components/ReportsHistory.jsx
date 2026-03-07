@@ -1,14 +1,12 @@
 // src/components/ReportsHistory.jsx
-// Manages saved BBS reports with view, download, and delete functionality
+// Desktop: unchanged. Mobile: page-pad, reports-grid stacks to 1-col.
 
 import { useState, useEffect } from "react";
 import { Card, CardHeader, Button, Badge } from "./ui.jsx";
 import { downloadPDF } from "../utils/pdfReport.js";
 
-// Storage key for reports
 const STORAGE_KEY = "bbs_saved_reports";
 
-// Helper functions for localStorage
 export function saveReport(reportData) {
   try {
     const reports = getSavedReports();
@@ -17,7 +15,7 @@ export function saveReport(reportData) {
       timestamp: new Date().toISOString(),
       ...reportData,
     };
-    reports.unshift(newReport); // Add to beginning
+    reports.unshift(newReport);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
     return newReport;
   } catch (error) {
@@ -31,19 +29,16 @@ export function getSavedReports() {
     const data = localStorage.getItem(STORAGE_KEY);
     return data ? JSON.parse(data) : [];
   } catch (error) {
-    console.error("Error loading reports:", error);
     return [];
   }
 }
 
 export function deleteReport(id) {
   try {
-    const reports = getSavedReports();
-    const filtered = reports.filter((r) => r.id !== id);
+    const filtered = getSavedReports().filter((r) => r.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
     return true;
-  } catch (error) {
-    console.error("Error deleting report:", error);
+  } catch {
     return false;
   }
 }
@@ -52,31 +47,25 @@ export function clearAllReports() {
   try {
     localStorage.removeItem(STORAGE_KEY);
     return true;
-  } catch (error) {
-    console.error("Error clearing reports:", error);
+  } catch {
     return false;
   }
 }
 
-// ─── REPORTS HISTORY COMPONENT ───────────────────────────────────────────────
 export default function ReportsHistory({ onLoadReport, onClose }) {
   const [reports, setReports] = useState([]);
-  const [selectedReport, setSelectedReport] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     loadReports();
   }, []);
 
-  const loadReports = () => {
-    setReports(getSavedReports());
-  };
+  const loadReports = () => setReports(getSavedReports());
 
   const handleDelete = (id) => {
     if (confirm("Are you sure you want to delete this report?")) {
       deleteReport(id);
       loadReports();
-      if (selectedReport?.id === id) setSelectedReport(null);
     }
   };
 
@@ -88,13 +77,11 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
     ) {
       clearAllReports();
       loadReports();
-      setSelectedReport(null);
     }
   };
 
-  const handleDownload = (report) => {
+  const handleDownload = (report) =>
     downloadPDF(report.details, report.byType, report.allRows, report.costs);
-  };
 
   const filteredReports = reports.filter((r) => {
     const search = searchTerm.toLowerCase();
@@ -106,16 +93,14 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
     );
   });
 
-  const formatDate = (iso) => {
-    const date = new Date(iso);
-    return date.toLocaleDateString("en-IN", {
+  const formatDate = (iso) =>
+    new Date(iso).toLocaleDateString("en-IN", {
       year: "numeric",
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
 
   return (
     <div
@@ -123,9 +108,11 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
     >
       {/* Header */}
       <div
+        className="page-pad"
         style={{
           background: "linear-gradient(135deg,#1565c0,#0d47a1)",
-          padding: "22px 32px",
+          paddingTop: 22,
+          paddingBottom: 22,
           marginBottom: 24,
         }}
       >
@@ -136,6 +123,7 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
             display: "flex",
             alignItems: "center",
             gap: 12,
+            flexWrap: "wrap",
           }}
         >
           <button
@@ -149,6 +137,7 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
               cursor: "pointer",
               fontSize: 12,
               fontWeight: 600,
+              flexShrink: 0,
             }}
           >
             ← Back to Calculator
@@ -180,6 +169,7 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
                 fontSize: 12,
                 fontWeight: 600,
                 cursor: "pointer",
+                flexShrink: 0,
               }}
             >
               🗑 Clear All ({reports.length})
@@ -188,8 +178,10 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 32px" }}>
-        {/* Search bar */}
+      <div
+        className="page-pad"
+        style={{ maxWidth: 1400, margin: "0 auto", paddingTop: 0 }}
+      >
         {reports.length > 0 && (
           <div style={{ marginBottom: 20 }}>
             <input
@@ -209,7 +201,6 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
           </div>
         )}
 
-        {/* Empty state */}
         {reports.length === 0 && (
           <div
             style={{
@@ -255,15 +246,9 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
           </div>
         )}
 
-        {/* Reports list */}
+        {/* reports-grid: auto-fill desktop, 1-col mobile */}
         {filteredReports.length > 0 && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
-              gap: 16,
-            }}
-          >
+          <div className="reports-grid">
             {filteredReports.map((report) => {
               const totalWt =
                 report.allRows?.reduce((s, r) => s + r.weight, 0) || 0;
@@ -273,17 +258,7 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
                 report.byType?.filter((t) => t.rows?.length > 0).length || 0;
 
               return (
-                <Card
-                  key={report.id}
-                  style={{ cursor: "pointer", transition: "all .2s" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.boxShadow =
-                      "0 4px 16px rgba(0,0,0,.12)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.boxShadow = "var(--shadow-sm)")
-                  }
-                >
+                <Card key={report.id}>
                   <div
                     style={{
                       padding: "14px 16px",
@@ -321,7 +296,6 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
                       </div>
                       <Badge label={`${elementCount} types`} color="blue" />
                     </div>
-
                     <div
                       style={{
                         fontSize: 12,
@@ -448,7 +422,6 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
           </div>
         )}
 
-        {/* No search results */}
         {reports.length > 0 && filteredReports.length === 0 && (
           <div
             style={{
@@ -478,3 +451,4 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
     </div>
   );
 }
+4

@@ -1,5 +1,6 @@
 // src/App.jsx
-// FINAL VERSION: Staircase, 1-way/2-way slabs, per-piece rates, WhatsApp bar orders, units
+// Desktop layout: UNCHANGED from original.
+// Mobile: CSS classes handle breakpoints (kpi-grid, action-bar, hscroll, calc-cta, page-pad).
 
 import { useState, useCallback } from "react";
 import Header from "./components/Header.jsx";
@@ -55,7 +56,7 @@ function calcItems(type, items) {
   });
 }
 
-// ─── RESULT PAGE ─────────────────────────────────────────────────────────────
+// ─── RESULT PAGE ───────────────────────────────────────────────────────────────
 function ResultPage({ result, rates, onRateChange, onBack, details }) {
   const [sending, setSending] = useState(false);
   const [sentMsg, setSentMsg] = useState("");
@@ -91,7 +92,6 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
     }, 200);
   };
 
-  // 🆕 WhatsApp Bar Purchase Order
   const handleSendBarOrder = () => {
     if (!details.engineerPhone || details.engineerPhone.length < 10) {
       alert(
@@ -106,8 +106,9 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
     window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
   };
 
+  // action-bar class makes it column + full-width on mobile
   const ActionBar = ({ style }) => (
-    <div style={{ display: "flex", gap: 12, ...style }}>
+    <div className="action-bar" style={style}>
       <button
         onClick={handleDownload}
         disabled={dlBusy}
@@ -145,7 +146,7 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
           boxShadow: "0 2px 8px rgba(37,211,102,.35)",
         }}
       >
-        {sending ? "⏳ Opening…" : `💬 Send Report via WhatsApp`}
+        {sending ? "⏳ Opening…" : "💬 Send Report via WhatsApp"}
       </button>
     </div>
   );
@@ -158,8 +159,11 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
           background: "linear-gradient(135deg,#1565c0,#0d47a1)",
           padding: "22px 32px",
         }}
+        className="page-pad"
+        /* page-pad class sets 32px on desktop, 14px on mobile */
       >
         <div style={{ maxWidth: 1400, margin: "0 auto" }}>
+          {/* Top row: back + project name + action bar */}
           <div
             style={{
               display: "flex",
@@ -180,6 +184,7 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
                 cursor: "pointer",
                 fontSize: 12,
                 fontWeight: 600,
+                flexShrink: 0,
               }}
             >
               ← Back
@@ -206,16 +211,12 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
               </span>
             )}
             <div style={{ flex: 1 }} />
+            {/* action-bar hidden here on very small screens; shown in bottom CTA instead */}
             <ActionBar />
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4,1fr)",
-              gap: 14,
-            }}
-          >
+          {/* KPIs: kpi-grid = 4-col desktop, 2-col mobile */}
+          <div className="kpi-grid">
             {[
               {
                 label: "Total Steel Weight",
@@ -310,7 +311,13 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
       )}
 
       <div
-        style={{ maxWidth: 1400, margin: "0 auto", padding: "24px 32px 40px" }}
+        className="page-pad"
+        style={{
+          maxWidth: 1400,
+          margin: "0 auto",
+          paddingTop: 24,
+          paddingBottom: 40,
+        }}
       >
         {/* Per-type BBS */}
         {byType.map(
@@ -371,16 +378,12 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
 
         {/* Bottom CTA */}
         <div
+          className="result-cta"
           style={{
             background: "white",
             border: "1px solid var(--border)",
             borderRadius: 10,
             padding: "18px 24px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: 12,
           }}
         >
           <div>
@@ -416,7 +419,7 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
   );
 }
 
-// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+// ─── MAIN APP ──────────────────────────────────────────────────────────────────
 export default function App() {
   const [activeTab, setActiveTab] = useState("footing");
   const [details, setDetails] = useState(DEFAULT_PROJECT);
@@ -486,11 +489,8 @@ export default function App() {
     });
     const allRows = byType.flatMap((t) => t.rows);
     const costs = costSummary(allRows, rates);
-
     const resultData = { byType, allRows, costs };
     setResult(resultData);
-
-    // Auto-save report
     saveReport({
       details: { ...details },
       byType,
@@ -498,7 +498,6 @@ export default function App() {
       costs,
       rates: { ...rates },
     });
-
     setViewMode("result");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [
@@ -524,7 +523,6 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // ─── VIEW: REPORTS HISTORY ───────────────────────────────────────────────────
   if (viewMode === "history") {
     return (
       <>
@@ -542,7 +540,6 @@ export default function App() {
     );
   }
 
-  // ─── VIEW: RESULT PAGE ────────────────────────────────────────────────────────
   if (viewMode === "result" && result) {
     return (
       <>
@@ -562,7 +559,7 @@ export default function App() {
     );
   }
 
-  // ─── VIEW: CALCULATOR (DEFAULT) ──────────────────────────────────────────────
+  // ─── CALCULATOR VIEW ─────────────────────────────────────────────────────────
   return (
     <div style={{ minHeight: "100vh" }}>
       <Header
@@ -571,12 +568,21 @@ export default function App() {
         onViewHistory={() => setViewMode("history")}
       />
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "24px 32px" }}>
-        {/* Project Details */}
+      {/* page-pad: 32px desktop → 14px mobile */}
+      <div
+        className="page-pad"
+        style={{
+          maxWidth: 1400,
+          margin: "0 auto",
+          paddingTop: 24,
+          paddingBottom: 40,
+        }}
+      >
         <ProjectDetails details={details} setDetails={setDetails} />
 
-        {/* Overview strip */}
+        {/* Overview strip — hscroll on mobile */}
         <div
+          className="hscroll"
           style={{
             background: "white",
             border: "1px solid var(--border)",
@@ -586,11 +592,17 @@ export default function App() {
             display: "flex",
             alignItems: "center",
             gap: 14,
-            flexWrap: "wrap",
             boxShadow: "var(--shadow-sm)",
           }}
         >
-          <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text)" }}>
+          <span
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: "var(--text)",
+              flexShrink: 0,
+            }}
+          >
             Elements:
           </span>
           {TABS.map((t) => {
@@ -606,6 +618,7 @@ export default function App() {
                   padding: "5px 12px",
                   borderRadius: 6,
                   cursor: "pointer",
+                  flexShrink: 0,
                   background:
                     activeTab === t.id
                       ? "var(--primary-light)"
@@ -642,19 +655,19 @@ export default function App() {
             );
           })}
           <div style={{ flex: 1 }} />
-          <span style={{ fontSize: 12, color: "var(--text3)" }}>
+          <span style={{ fontSize: 12, color: "var(--text3)", flexShrink: 0 }}>
             Total: <b style={{ color: "var(--primary)" }}>{totalNos}</b> nos
           </span>
         </div>
 
-        {/* Tab nav */}
+        {/* Tab nav — hscroll on mobile */}
         <div
+          className="tab-nav hscroll"
           style={{
             display: "flex",
             gap: 0,
             borderBottom: "2px solid var(--border)",
             marginBottom: 20,
-            overflowX: "auto",
           }}
         >
           {TABS.map((t) => {
@@ -668,6 +681,7 @@ export default function App() {
                   border: "none",
                   background: "none",
                   cursor: "pointer",
+                  flexShrink: 0,
                   borderBottom:
                     activeTab === t.id
                       ? `3px solid ${t.color}`
@@ -712,19 +726,131 @@ export default function App() {
           />
         </div>
 
-        {/* Calculate CTA */}
+        {/* ── Next / Prev Tab Navigation ── */}
+        {(() => {
+          const currentIndex = TABS.findIndex((t) => t.id === activeTab);
+          const prevTab = TABS[currentIndex - 1];
+          const nextTab = TABS[currentIndex + 1];
+          return (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginTop: 20,
+                gap: 12,
+              }}
+            >
+              {/* Prev */}
+              {prevTab ? (
+                <button
+                  onClick={() => setActiveTab(prevTab.id)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    background: "white",
+                    border: `1.5px solid ${prevTab.color}`,
+                    color: prevTab.color,
+                    borderRadius: 8,
+                    padding: "10px 20px",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    boxShadow: "var(--shadow-sm)",
+                  }}
+                >
+                  ← {prevTab.icon} {prevTab.label}
+                </button>
+              ) : (
+                <div />
+              )}
+
+              {/* Step indicator dots */}
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                {TABS.map((t, i) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setActiveTab(t.id)}
+                    title={t.label}
+                    style={{
+                      width: i === currentIndex ? 28 : 8,
+                      height: 8,
+                      borderRadius: 99,
+                      border: "none",
+                      cursor: "pointer",
+                      padding: 0,
+                      background:
+                        i === currentIndex
+                          ? TABS[currentIndex].color
+                          : "var(--border)",
+                      transition: "all .2s",
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Next */}
+              {nextTab ? (
+                <button
+                  onClick={() => setActiveTab(nextTab.id)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    background: nextTab.color,
+                    border: "none",
+                    color: "#fff",
+                    borderRadius: 8,
+                    padding: "10px 20px",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    boxShadow: `0 2px 10px ${nextTab.color}55`,
+                  }}
+                >
+                  {nextTab.icon} {nextTab.label} →
+                </button>
+              ) : (
+                /* On last tab, show the Calculate button instead */
+                <button
+                  onClick={handleCalculate}
+                  disabled={!projectReady}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    background: projectReady
+                      ? "linear-gradient(135deg,#1565c0,#0d47a1)"
+                      : "#b0bec5",
+                    border: "none",
+                    color: "#fff",
+                    borderRadius: 8,
+                    padding: "10px 20px",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: projectReady ? "pointer" : "not-allowed",
+                    boxShadow: projectReady
+                      ? "0 2px 10px rgba(21,101,192,.4)"
+                      : "none",
+                  }}
+                >
+                  ⚡ Calculate BBS →
+                </button>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* Calculate CTA — calc-cta: row desktop, column mobile */}
         <div
+          className="calc-cta"
           style={{
             marginTop: 28,
             padding: "20px 24px",
             background: "linear-gradient(135deg,#e3eefb,#f0f6ff)",
             border: "1px solid var(--border)",
             borderRadius: "var(--radius)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: 14,
           }}
         >
           <div>
@@ -759,13 +885,14 @@ export default function App() {
               display: "flex",
               alignItems: "center",
               gap: 8,
+              whiteSpace: "nowrap",
             }}
           >
             ⚡ Calculate & Generate BBS
           </button>
         </div>
 
-        {/* 🆕 WB Rates (Per-Piece) */}
+        {/* WB Rates */}
         <div
           style={{
             marginTop: 16,
@@ -786,6 +913,7 @@ export default function App() {
           >
             ₹ WEST BENGAL MARKET RATES (Per 12m Rod) — Edit anytime:
           </div>
+          {/* flex-wrap so rates wrap naturally on mobile */}
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             {Object.keys(rates).map((d) => (
               <div

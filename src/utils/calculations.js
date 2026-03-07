@@ -1,5 +1,5 @@
 // ─── IS 456:2000 + IS 2502:1963 CALCULATION ENGINE ───────────────────────────
-// UPDATED: Added staircase, 1-way/2-way slabs, unit conversions, per-piece rates
+// FIXED: Meters only. Spacing always in mm → divide by 1000 ONCE. No double conversion.
 
 export const BAR_WEIGHT = {
   6: 0.222,
@@ -13,70 +13,43 @@ export const BAR_WEIGHT = {
 };
 export const BAR_DIAS = [6, 8, 10, 12, 16, 20, 25, 32];
 
-// 🆕 Per-piece rates for 12m standard rods (West Bengal market rates)
 export const DEFAULT_RATES_PER_PIECE = {
-  6: 160, // ₹160 per 12m rod
-  8: 280, // ₹280 per 12m rod
-  10: 440, // ₹440 per 12m rod
-  12: 635, // ₹635 per 12m rod
-  16: 1130, // ₹1130 per 12m rod
-  20: 1775, // ₹1775 per 12m rod
-  25: 2775, // ₹2775 per 12m rod
-  32: 4550, // ₹4550 per 12m rod
+  6: 160,
+  8: 280,
+  10: 440,
+  12: 635,
+  16: 1130,
+  20: 1775,
+  25: 2775,
+  32: 4550,
 };
-
-// 🆕 Unit conversion factors to meters
-export const UNIT_TO_METERS = {
-  m: 1,
-  mm: 0.001,
-  ft: 0.3048,
-  in: 0.0254,
-};
-
-export const UNITS = ["m", "mm", "ft", "in"];
-
-// Helper: Convert to meters
-export function toMeters(value, unit) {
-  return parseFloat(value) * UNIT_TO_METERS[unit];
-}
 
 export const COVER_MM = {
-  footing: 75, // IS 456 Cl.26.4.2.2
-  column: 40, // IS 456 Cl.26.4.2.1
-  plinthBeam: 40, // IS 456 Cl.26.4.2.1
-  wallBeam: 25, // IS 456 Cl.26.4.2.1
-  slab: 20, // IS 456 Cl.26.4.2.1
-  staircase: 25, // IS 456 Cl.26.4.2.1
+  footing: 75,
+  column: 40,
+  plinthBeam: 40,
+  wallBeam: 25,
+  slab: 20,
+  staircase: 25,
 };
 
-// IS 2502 standard hook = 9d (90° bend)
-export const hookLen = (d) => (9 * d) / 1000;
-
-// IS 456 Cl.26.2.1 — tension lap = 40d
-export const lapLen = (d) => (40 * d) / 1000;
-
-// Stirrup perimeter with 135° hooks at both ends
+export const hookLen = (d) => (9 * d) / 1000; // 9d hook
+export const lapLen = (d) => (40 * d) / 1000; // 40d lap
 export const stirrupPerim = (b, d, cov) =>
   2 * (b - 2 * cov + (d - 2 * cov)) + 2 * hookLen(8) * 3;
 
-// ─── FOOTING ────────────────────────────────────────────────────────────────
-export function calcSingleFooting({
-  L,
-  B,
-  mainDia,
-  distDia,
-  spacing,
-  unit = "m",
-}) {
-  const l = toMeters(L, unit);
-  const b = toMeters(B, unit);
-  const sp = toMeters(spacing, "mm") / 1000;
+// ─── FOOTING ─────────────────────────────────────────────────────────────────
+// L, B → metres  |  spacing → mm
+export function calcSingleFooting({ L, B, mainDia, distDia, spacing }) {
+  const l = parseFloat(L);
+  const b = parseFloat(B);
+  const sp = parseFloat(spacing) / 1000; // mm → m
   const md = +mainDia,
     dd = +distDia;
   const cov = COVER_MM.footing / 1000;
 
-  const nMain = Math.ceil((b - 2 * cov) / sp) + 1;
-  const nDist = Math.ceil((l - 2 * cov) / sp) + 1;
+  const nMain = Math.floor((b - 2 * cov) / sp) + 1;
+  const nDist = Math.floor((l - 2 * cov) / sp) + 1;
   const lenMain = l - 2 * cov + 2 * hookLen(md);
   const lenDist = b - 2 * cov + 2 * hookLen(dd);
 
@@ -98,7 +71,8 @@ export function calcSingleFooting({
   ];
 }
 
-// ─── COLUMN ─────────────────────────────────────────────────────────────────
+// ─── COLUMN ──────────────────────────────────────────────────────────────────
+// H, B, D → metres  |  tieSpacing → mm
 export function calcSingleColumn({
   H,
   B,
@@ -107,15 +81,14 @@ export function calcSingleColumn({
   mainNos,
   tieDia,
   tieSpacing,
-  unit = "m",
 }) {
-  const h = toMeters(H, unit);
-  const b = toMeters(B, unit);
-  const d = toMeters(D, unit);
+  const h = parseFloat(H);
+  const b = parseFloat(B);
+  const d = parseFloat(D);
   const md = +mainDia,
     td = +tieDia;
   const cov = COVER_MM.column / 1000;
-  const sp = toMeters(tieSpacing, "mm") / 1000;
+  const sp = parseFloat(tieSpacing) / 1000; // mm → m
 
   const nTies = Math.ceil(h / sp) + 1;
   const mainLen = h + 2 * lapLen(md);
@@ -139,7 +112,8 @@ export function calcSingleColumn({
   ];
 }
 
-// ─── BEAM (plinth or wall) ───────────────────────────────────────────────────
+// ─── BEAM ─────────────────────────────────────────────────────────────────────
+// L, B, D → metres  |  stirSpacing → mm
 export function calcSingleBeam(
   {
     L,
@@ -153,15 +127,14 @@ export function calcSingleBeam(
     exTopNos,
     stirDia,
     stirSpacing,
-    unit = "m",
   },
   coverType,
 ) {
-  const l = toMeters(L, unit);
-  const b = toMeters(B, unit);
-  const d = toMeters(D, unit);
+  const l = parseFloat(L);
+  const b = parseFloat(B);
+  const d = parseFloat(D);
   const cov = COVER_MM[coverType] / 1000;
-  const sp = toMeters(stirSpacing, "mm") / 1000;
+  const sp = parseFloat(stirSpacing) / 1000; // mm → m
 
   const nStir = Math.ceil(l / sp) + 1;
   const stirLen = stirrupPerim(b, d, cov);
@@ -201,7 +174,8 @@ export function calcSingleBeam(
   return rows;
 }
 
-// ─── SLAB (1-way or 2-way) ───────────────────────────────────────────────────
+// ─── SLAB ─────────────────────────────────────────────────────────────────────
+// L, B, D → metres  |  mainSp, distSp, topSp → mm
 export function calcSingleSlab({
   L,
   B,
@@ -212,92 +186,95 @@ export function calcSingleSlab({
   topDia,
   topSp,
   slabType = "2-way",
-  unit = "m",
 }) {
-  const l = toMeters(L, unit);
-  const b = toMeters(B, unit);
+  const l = parseFloat(L);
+  const b = parseFloat(B);
   const cov = COVER_MM.slab / 1000;
 
-  const is1Way = slabType === "1-way" || l / b > 2; // 1-way if Ly/Lx > 2
+  const is1Way = slabType === "1-way" || l / b > 2;
 
-  const nMain = Math.ceil((b - 2 * cov) / toMeters(mainSp, "mm")) + 1;
-  const nDist = Math.ceil((l - 2 * cov) / toMeters(distSp, "mm")) + 1;
+  const msp = parseFloat(mainSp) / 1000; // mm → m
+  const dsp = parseFloat(distSp) / 1000; // mm → m
+
+  const nMain = Math.floor((b - 2 * cov) / msp) + 1;
+  const nDist = Math.floor((l - 2 * cov) / dsp) + 1;
   const lenMain = l - 2 * cov + 2 * hookLen(+mainDia);
   const lenDist = b - 2 * cov + 2 * hookLen(+distDia);
 
   const rows = [
     {
       mark: "A",
-      desc: `Main Bars - ${is1Way ? "Short span" : "Both ways"} (φ${mainDia}mm @${mainSp}mm)`,
       nos: nMain,
       cutLen: +lenMain.toFixed(3),
       dia: +mainDia,
+      desc: `Main Bars — ${is1Way ? "Short span" : "Both ways"} (φ${mainDia}mm @${mainSp}mm)`,
     },
     {
       mark: "B",
-      desc: `Dist Bars - ${is1Way ? "Long span" : "Both ways"} (φ${distDia}mm @${distSp}mm)`,
       nos: nDist,
       cutLen: +lenDist.toFixed(3),
       dia: +distDia,
+      desc: `Dist Bars — ${is1Way ? "Long span" : "Both ways"} (φ${distDia}mm @${distSp}mm)`,
     },
   ];
 
   if (+topSp > 0 && topDia) {
-    const nTop = Math.ceil((b - 2 * cov) / toMeters(topSp, "mm")) + 1;
+    const tsp = parseFloat(topSp) / 1000; // mm → m
+    const nTop = Math.floor((b - 2 * cov) / tsp) + 1;
     const lenTop = (l / 5) * 2 + 2 * hookLen(+topDia);
     rows.push({
       mark: "C",
-      desc: `Top Bars @ supports (φ${topDia}mm @${topSp}mm)`,
       nos: nTop,
       cutLen: +lenTop.toFixed(3),
       dia: +topDia,
+      desc: `Top Bars @ supports (φ${topDia}mm @${topSp}mm)`,
     });
   }
   return rows;
 }
 
-// 🆕 ─── STAIRCASE ─────────────────────────────────────────────────────────────
+// ─── STAIRCASE ────────────────────────────────────────────────────────────────
+// flightLen, width → metres  |  mainSp, distSp → mm
 export function calcSingleStaircase({
-  flightLen, // Length of flight
-  width, // Width of staircase
-  waistThick, // Waist slab thickness
-  mainDia, // Main bars (along flight)
-  mainSp, // Main bar spacing
-  distDia, // Distribution bars (across width)
-  distSp, // Dist bar spacing
-  unit = "m",
+  flightLen,
+  width,
+  waistThick,
+  mainDia,
+  mainSp,
+  distDia,
+  distSp,
 }) {
-  const l = toMeters(flightLen, unit);
-  const w = toMeters(width, unit);
+  const l = parseFloat(flightLen);
+  const w = parseFloat(width);
   const cov = COVER_MM.staircase / 1000;
 
-  // Main bars along the flight length
-  const nMain = Math.ceil((w - 2 * cov) / toMeters(mainSp, "mm")) + 1;
-  const lenMain = l + 2 * lapLen(+mainDia);
+  const msp = parseFloat(mainSp) / 1000; // mm → m
+  const dsp = parseFloat(distSp) / 1000; // mm → m
 
-  // Distribution bars across width
-  const nDist = Math.ceil((l - 2 * cov) / toMeters(distSp, "mm")) + 1;
+  const nMain = Math.floor((w - 2 * cov) / msp) + 1;
+  const lenMain = l + 2 * lapLen(+mainDia);
+  const nDist = Math.floor((l - 2 * cov) / dsp) + 1;
   const lenDist = w - 2 * cov + 2 * hookLen(+distDia);
 
   return [
     {
       mark: "A",
-      desc: `Main Bars along flight (φ${mainDia}mm @${mainSp}mm)`,
       nos: nMain,
       cutLen: +lenMain.toFixed(3),
       dia: +mainDia,
+      desc: `Main Bars along flight (φ${mainDia}mm @${mainSp}mm)`,
     },
     {
       mark: "B",
-      desc: `Distribution Bars (φ${distDia}mm @${distSp}mm)`,
       nos: nDist,
       cutLen: +lenDist.toFixed(3),
       dia: +distDia,
+      desc: `Distribution Bars (φ${distDia}mm @${distSp}mm)`,
     },
   ];
 }
 
-// ─── BUILD FULL BBS WITH WEIGHTS ─────────────────────────────────────────────
+// ─── BUILD BBS ────────────────────────────────────────────────────────────────
 export function buildBBS(rows) {
   return rows.map((r) => ({
     ...r,
@@ -306,7 +283,7 @@ export function buildBBS(rows) {
   }));
 }
 
-// ─── AGGREGATE MULTIPLE ITEMS ─────────────────────────────────────────────────
+// ─── AGGREGATE ────────────────────────────────────────────────────────────────
 export function aggregateBBS(allItems) {
   const combined = [];
   allItems.forEach(({ label, count, bbs }) => {
@@ -329,7 +306,7 @@ export function aggregateBBS(allItems) {
   return combined;
 }
 
-// 🆕 ─── COST SUMMARY (PER-PIECE RATES) ───────────────────────────────────────
+// ─── COST SUMMARY ─────────────────────────────────────────────────────────────
 export function costSummary(bbs, ratesPerPiece) {
   const byDia = {};
   bbs.forEach((r) => {
@@ -343,7 +320,6 @@ export function costSummary(bbs, ratesPerPiece) {
       const rods12m = Math.ceil(totalLen / 12);
       const ratePerPiece = ratesPerPiece[dia] || 0;
       const cost = rods12m * ratePerPiece;
-
       return {
         dia: +dia,
         kg: +kg.toFixed(2),
@@ -355,31 +331,21 @@ export function costSummary(bbs, ratesPerPiece) {
     });
 }
 
-// 🆕 ─── GENERATE BAR PURCHASE ORDER MESSAGE ──────────────────────────────────
+// ─── WHATSAPP BAR PURCHASE MESSAGE ────────────────────────────────────────────
 export function generateBarPurchaseMessage(costs, details) {
   const totalRods = costs.reduce((s, r) => s + r.rods12m, 0);
   const totalCost = costs.reduce((s, r) => s + r.cost, 0);
-
-  let message = `📦 *BAR PURCHASE ORDER*\n\n`;
-  message += `*Project:* ${details.projectName || "—"}\n`;
-  message += `*Location:* ${details.location || "—"}\n`;
-  message += `*Date:* ${details.date || new Date().toISOString().split("T")[0]}\n\n`;
-  message += `━━━━━━━━━━━━━━━━━━━━\n`;
-  message += `*BARS REQUIRED (12m STD RODS)*\n`;
-  message += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-
+  let msg = `📦 *BAR PURCHASE ORDER*\n\n`;
+  msg += `*Project:* ${details.projectName || "—"}\n`;
+  msg += `*Location:* ${details.location || "—"}\n`;
+  msg += `*Date:* ${details.date || new Date().toISOString().split("T")[0]}\n\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n*BARS REQUIRED (12m STD RODS)*\n━━━━━━━━━━━━━━━━━━━━\n\n`;
   costs.forEach((c) => {
-    message += `φ${c.dia}mm: *${c.rods12m} rods* (${c.kg} kg)\n`;
-    message += `   @ ₹${c.ratePerPiece}/piece = ₹${c.cost.toLocaleString("en-IN")}\n\n`;
+    msg += `φ${c.dia}mm: *${c.rods12m} rods* (${c.kg} kg)\n`;
+    msg += `   @ ₹${c.ratePerPiece}/piece = ₹${c.cost.toLocaleString("en-IN")}\n\n`;
   });
-
-  message += `━━━━━━━━━━━━━━━━━━━━\n`;
-  message += `*TOTAL: ${totalRods} rods*\n`;
-  message += `*TOTAL COST: ₹${totalCost.toLocaleString("en-IN")}*\n`;
-  message += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-  message += `_Please confirm availability and delivery date._\n\n`;
-  message += `Contact: ${details.engineerName || "—"}\n`;
-  if (details.engineerPhone) message += `Phone: +91 ${details.engineerPhone}`;
-
-  return message;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n*TOTAL: ${totalRods} rods*\n*TOTAL COST: ₹${totalCost.toLocaleString("en-IN")}*\n━━━━━━━━━━━━━━━━━━━━\n\n`;
+  msg += `_Please confirm availability and delivery date._\n\nContact: ${details.engineerName || "—"}\n`;
+  if (details.engineerPhone) msg += `Phone: +91 ${details.engineerPhone}`;
+  return msg;
 }

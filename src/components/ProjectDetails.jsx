@@ -1,5 +1,5 @@
 // src/components/ProjectDetails.jsx
-// Client info, engineer info, WhatsApp number — used in report
+// Desktop: unchanged. Mobile: stacked columns, no zoom on focus.
 
 import { useState } from "react";
 import { Card, CardHeader } from "./ui.jsx";
@@ -12,7 +12,7 @@ export const DEFAULT_PROJECT = {
   clientAddress: "",
   location: "",
   engineerName: "",
-  engineerPhone: "", // This is the WhatsApp target number
+  engineerPhone: "",
   engineerEmail: "",
   firmName: "",
   date: today(),
@@ -54,7 +54,6 @@ function TF({
           border: "1.5px solid #d0dce8",
           borderRadius: 6,
           padding: "8px 11px",
-          fontSize: 13,
           color: "#1a2535",
           fontFamily: type === "tel" ? "var(--font-mono)" : "var(--font-sans)",
           background: "#fff",
@@ -99,7 +98,6 @@ function TA({ label, value, onChange, placeholder = "", rows = 2 }) {
           border: "1.5px solid #d0dce8",
           borderRadius: 6,
           padding: "8px 11px",
-          fontSize: 13,
           color: "#1a2535",
           fontFamily: "var(--font-sans)",
           background: "#fff",
@@ -142,13 +140,7 @@ export default function ProjectDetails({ details, setDetails }) {
       {open && (
         <div style={{ padding: "18px 20px" }}>
           {/* Row 1: Project + Ref + Date */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "2fr 1fr 1fr",
-              gap: "0 16px",
-            }}
-          >
+          <div className="proj-row1">
             <TF
               label="Project Name"
               value={details.projectName}
@@ -171,14 +163,9 @@ export default function ProjectDetails({ details, setDetails }) {
             />
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "0 24px",
-            }}
-          >
-            {/* ── CLIENT DETAILS ── */}
+          {/* Client + Engineer — 2 col desktop, 1 col mobile */}
+          <div className="proj-cols">
+            {/* CLIENT */}
             <div>
               <div
                 style={{
@@ -217,7 +204,7 @@ export default function ProjectDetails({ details, setDetails }) {
               />
             </div>
 
-            {/* ── ENGINEER DETAILS ── */}
+            {/* ENGINEER */}
             <div>
               <div
                 style={{
@@ -255,7 +242,7 @@ export default function ProjectDetails({ details, setDetails }) {
                 type="email"
               />
 
-              {/* WhatsApp Number — highlighted */}
+              {/* WhatsApp */}
               <div style={{ marginBottom: 12 }}>
                 <label
                   style={{
@@ -298,7 +285,6 @@ export default function ProjectDetails({ details, setDetails }) {
                       border: "2px solid #25d366",
                       borderRadius: 6,
                       padding: "8px 11px 8px 40px",
-                      fontSize: 14,
                       color: "#1a2535",
                       fontFamily: "var(--font-mono)",
                       fontWeight: 600,
@@ -326,7 +312,6 @@ export default function ProjectDetails({ details, setDetails }) {
             </div>
           </div>
 
-          {/* Remarks */}
           <TA
             label="Remarks / Notes"
             value={details.remarks}

@@ -1,6 +1,5 @@
 // src/components/Header.jsx
-// Logo slot + navigation + CTA button
-// UPDATED: Added Reports History button
+// Desktop: unchanged. Mobile: compact, labels shorten.
 
 export default function Header({
   onGenerateReport,
@@ -10,11 +9,11 @@ export default function Header({
 }) {
   return (
     <header
+      className="site-header"
       style={{
         background: "#fff",
         borderBottom: "1px solid #dce6f0",
         padding: "0 32px",
-        height: 64,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -22,14 +21,34 @@ export default function Header({
         top: 0,
         zIndex: 200,
         boxShadow: "0 2px 8px rgba(0,0,0,.06)",
+        gap: 8,
       }}
     >
-      {/* ── LEFT: Logo Area ── */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        {/* 
-          LOGO SLOT: Replace the div below with your <img> tag.
-          Example: <img src="/logo.png" alt="Your Logo" style={{ height: 40 }} />
-        */}
+      <style>{`
+        @media (max-width: 600px) {
+          .site-header { padding: 0 14px !important; }
+        }
+        .hdr-subtitle { display: block; }
+        @media (max-width: 500px) { .hdr-subtitle { display: none; } }
+        .hdr-nav { display: flex; }
+        @media (max-width: 640px) { .hdr-nav { display: none; } }
+        .hdr-btn-full { display: inline; }
+        .hdr-btn-short { display: none; }
+        @media (max-width: 440px) {
+          .hdr-btn-full { display: none; }
+          .hdr-btn-short { display: inline; }
+        }
+      `}</style>
+
+      {/* ── LEFT: Logo ── */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          flexShrink: 0,
+        }}
+      >
         <div
           style={{
             height: 42,
@@ -48,21 +67,19 @@ export default function Header({
         >
           ⚙
         </div>
-
         <div>
-          {/* Replace this text with your company name */}
           <div
             style={{
               fontWeight: 800,
               fontSize: 17,
               color: "#1565c0",
               letterSpacing: 0.3,
-              fontFamily: "var(--font-sans)",
             }}
           >
             BBS Calculator
           </div>
           <div
+            className="hdr-subtitle"
             style={{
               fontSize: 10,
               color: "#8090a8",
@@ -75,8 +92,8 @@ export default function Header({
         </div>
       </div>
 
-      {/* ── CENTER: Nav ── */}
-      <nav style={{ display: "flex", alignItems: "center", gap: 4 }}>
+      {/* ── CENTER: Nav (hidden on mobile) ── */}
+      <nav className="hdr-nav" style={{ alignItems: "center", gap: 4 }}>
         <span
           style={{
             padding: "7px 20px",
@@ -86,6 +103,7 @@ export default function Header({
             fontWeight: 600,
             color: "#1565c0",
             background: "#f0f6ff",
+            whiteSpace: "nowrap",
           }}
         >
           BBS Calculator
@@ -93,8 +111,14 @@ export default function Header({
       </nav>
 
       {/* ── RIGHT: CTA ── */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        {/* Reports History Button */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          flexShrink: 0,
+        }}
+      >
         {showHistoryButton && onViewHistory && (
           <button
             onClick={onViewHistory}
@@ -107,25 +131,18 @@ export default function Header({
               fontSize: 13,
               fontWeight: 700,
               cursor: "pointer",
-              fontFamily: "var(--font-sans)",
-              letterSpacing: 0.5,
               display: "flex",
               alignItems: "center",
               gap: 7,
-              transition: "all .2s",
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.background = "#f0f6ff";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = "white";
+              whiteSpace: "nowrap",
             }}
           >
-            📚 Saved Reports
+            <span>📚</span>
+            <span className="hdr-btn-full">Saved Reports</span>
+            <span className="hdr-btn-short">Saved</span>
           </button>
         )}
 
-        {/* Generate Report Button */}
         <button
           onClick={onGenerateReport}
           style={{
@@ -139,18 +156,18 @@ export default function Header({
             fontSize: 13,
             fontWeight: 700,
             cursor: projectReady ? "pointer" : "not-allowed",
-            fontFamily: "var(--font-sans)",
-            letterSpacing: 0.5,
             boxShadow: projectReady
               ? "0 2px 10px rgba(21,101,192,.35)"
               : "none",
             display: "flex",
             alignItems: "center",
             gap: 7,
-            transition: "all .2s",
+            whiteSpace: "nowrap",
           }}
         >
-          📄 Generate Report
+          <span>📄</span>
+          <span className="hdr-btn-full">Generate Report</span>
+          <span className="hdr-btn-short">Generate</span>
         </button>
       </div>
     </header>

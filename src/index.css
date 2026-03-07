@@ -2,7 +2,6 @@
   --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
 
-  /* Palette — Light Professional Engineering Theme */
   --bg: #f5f7fa;
   --surface: #ffffff;
   --surface2: #f0f4f8;
@@ -42,6 +41,10 @@
   padding: 0;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   font-family: var(--font-sans);
   background: var(--bg);
@@ -49,6 +52,7 @@ body {
   font-size: 14px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 input[type=number],
@@ -66,6 +70,16 @@ textarea {
   transition: border-color .15s;
 }
 
+/* Prevent iOS zoom-on-focus (requires font-size >= 16px on mobile) */
+@media (max-width: 768px) {
+
+  input[type=number],
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 input[type=number]:focus,
 select:focus {
   border-color: var(--primary);
@@ -79,9 +93,9 @@ input[type=number]::-webkit-inner-spin-button {
 button {
   cursor: pointer;
   font-family: var(--font-sans);
+  touch-action: manipulation;
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -96,7 +110,6 @@ button {
   border-radius: 99px;
 }
 
-/* Utility */
 .mono {
   font-family: var(--font-mono);
 }
@@ -112,7 +125,6 @@ button {
   color: var(--primary);
 }
 
-/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -127,4 +139,196 @@ button {
 
 .fade-in {
   animation: fadeIn .25s ease;
+}
+
+/* ─── Layout helpers (desktop-first, mobile override) ─── */
+
+/* Page padding: 32px desktop, 14px mobile */
+.page-pad {
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+@media (max-width: 768px) {
+  .page-pad {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
+
+@media (max-width: 400px) {
+  .page-pad {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+/* Tables: always scroll horizontally on mobile */
+.tbl-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Horizontal scroll strip (overview, tabs) */
+.hscroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  flex-wrap: nowrap !important;
+}
+
+/* Action bar: row on desktop, column on mobile */
+.action-bar {
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 560px) {
+  .action-bar {
+    flex-direction: column;
+  }
+
+  .action-bar button {
+    width: 100% !important;
+    justify-content: center;
+  }
+}
+
+/* KPI grid: 4-col desktop, 2-col mobile */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 600px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+/* Project detail row 1: 2fr 1fr 1fr desktop, 1-col mobile */
+.proj-row1 {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 0 16px;
+}
+
+@media (max-width: 580px) {
+  .proj-row1 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Project 2-col client/engineer: side-by-side desktop, stacked mobile */
+.proj-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 24px;
+}
+
+@media (max-width: 640px) {
+  .proj-cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Form grid inside item cards: 2-col desktop, 1-col mobile */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 14px;
+}
+
+@media (max-width: 500px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Cost table grid: 2-col desktop, 1-col mobile */
+.cost-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 680px) {
+  .cost-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Reports history grid */
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 480px) {
+  .reports-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Calculate CTA: flex row desktop, stacked mobile */
+.calc-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+@media (max-width: 560px) {
+  .calc-cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .calc-cta button {
+    width: 100% !important;
+  }
+}
+
+/* Result bottom CTA */
+.result-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@media (max-width: 560px) {
+  .result-cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Item card header */
+.item-hdr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+@media (max-width: 520px) {
+  .item-hdr {
+    flex-wrap: wrap;
+  }
+}
+
+/* Header height */
+.site-header {
+  height: 64px;
+}
+
+@media (max-width: 600px) {
+  .site-header {
+    height: 56px;
+  }
 }

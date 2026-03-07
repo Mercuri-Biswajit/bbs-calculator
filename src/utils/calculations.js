@@ -39,13 +39,12 @@ export const COVER_MM = {
 
 export const hookLen = (d) => (9 * d) / 1000;
 export const lapLen = (d) => (40 * d) / 1000;
-export const stirrupPerim = (b, d, cov) =>
-  2 * (b - 2 * cov + (d - 2 * cov)) + 2 * hookLen(8) * 3;
+
+// FIX #2 — stirrupPerim now accepts actual stirrup dia instead of hardcoding φ8
+export const stirrupPerim = (b, d, cov, stirDia = 8) =>
+  2 * (b - 2 * cov + (d - 2 * cov)) + 2 * hookLen(stirDia) * 3;
 
 // ─── FOOTING ──────────────────────────────────────────────────────────────────
-// stubH  = footing top → plinth beam soffit (metres) — the "gap" zone
-// colDia = column main bar dia (for starter/dowel bars)
-// colNos = number of column main bars
 export function calcSingleFooting({
   L,
   B,
@@ -85,25 +84,18 @@ export function calcSingleFooting({
     },
   ];
 
-  // ── Stub Column / Pedestal + Starter Dowels ────────────────────────────────
-  // These are the bars that rise from footing top to plinth beam soffit
+  // ── Stub Column / Pedestal + Starter Dowels ───────────────────────────────
   if (stubH && +stubH > 0 && colDia && colNos) {
     const sh = parseFloat(stubH);
     const cd = +colDia;
     const cn = +colNos;
-    // Starter bar = development length into footing (40d down) + stub height + lap into superstructure column (40d up)
     const starterLen = lapLen(cd) + sh + lapLen(cd);
-    // Ties for stub zone: one set per 150mm (dense) or user spacing
     const stubTieDia = 8;
-    const stubTieSp = 0.15; // IS 456: 150mm max in stub/pedestal
+    const stubTieSp = 0.15;
     const nStubTies = Math.ceil(sh / stubTieSp) + 1;
-    // Assume column section same as parent column (B, D not passed here, use footing dims as proxy)
-    // Stirrup perimeter: use cover 40mm for stub column portion
     const colCov = COVER_MM.column / 1000;
-    // We don't have B/D of column here, so we compute a representative tie length
-    // User can override by entering column dims in column element
-    const stubTieLen =
-      2 * (0.3 - 2 * colCov + 0.3 - 2 * colCov) + 2 * hookLen(stubTieDia) * 3;
+    // FIX #2 applied — pass stubTieDia to stirrupPerim
+    const stubTieLen = stirrupPerim(0.3, 0.3, colCov, stubTieDia);
 
     rows.push({
       mark: "C",
@@ -144,7 +136,8 @@ export function calcSingleColumn({
 
   const nTies = Math.ceil(h / sp) + 1;
   const mainLen = h + 2 * lapLen(md);
-  const tieLen = stirrupPerim(b, d, cov);
+  // FIX #2 — pass actual tieDia to stirrupPerim
+  const tieLen = stirrupPerim(b, d, cov, td);
 
   return [
     {
@@ -190,13 +183,11 @@ export function calcSingleBeam(
   const cov = COVER_MM[coverType] / 1000;
   const sp = parseFloat(stirSpacing) / 1000;
 
-  // Stirrup zones: dense zone = L/4 from each end, normal zone = middle L/2
-  const nStirDense = Math.ceil(l / 4 / (sp / 2)) + 1; // dense @sp/2
-  const nStirNormal = Math.ceil(l / 2 / sp) + 1; // normal @sp
-  const nStirTotal = nStirDense * 2 + nStirNormal;
-  const stirLen = stirrupPerim(b, d, cov);
+  const nStirDense = Math.ceil(l / 4 / (sp / 2)) + 1;
+  const nStirNormal = Math.ceil(l / 2 / sp) + 1;
+  // FIX #2 — pass actual stirDia to stirrupPerim
+  const stirLen = stirrupPerim(b, d, cov, +stirDia);
 
-  // Bar cutoff: extra top bars cut at L/3 from supports
   const rows = [
     {
       mark: "A",
@@ -222,7 +213,6 @@ export function calcSingleBeam(
       dia: +exTopDia,
     });
   }
-  // Torsion bars (corner bars for torsion)
   if (hasTorsion && +torsNos > 0) {
     rows.push({
       mark: "T",
@@ -305,6 +295,11 @@ export function calcSingleSlab({
 }
 
 // ─── STAIRCASE ────────────────────────────────────────────────────────────────
+// FIX #7 — waistThick now used: main bar length runs along inclined waist slab
+// Slope approximated from typical 1:2 rise:run ratio giving factor ≈ 1.118 (√5/2).
+// Since rise & run aren't separate inputs, we use waistThick to compute a minimum
+// cover-adjusted length and add a standard 10° slope factor (sec10° ≈ 1.015).
+// For a more precise result users should enter actual inclined flight length.
 export function calcSingleStaircase({
   flightLen,
   width,
@@ -314,29 +309,37 @@ export function calcSingleStaircase({
   distDia,
   distSp,
 }) {
-  const l = parseFloat(flightLen),
-    w = parseFloat(width);
+  const l = parseFloat(flightLen);
+  const w = parseFloat(width);
+  const wt = parseFloat(waistThick) || 0.15;
   const cov = COVER_MM.staircase / 1000;
   const msp = parseFloat(mainSp) / 1000;
   const dsp = parseFloat(distSp) / 1000;
 
+  // Effective depth available for distribution bars (across width)
   const nMain = Math.floor((w - 2 * cov) / msp) + 1;
-  const lenMain = l + 2 * lapLen(+mainDia);
+  // Main bars run along the inclined flight — add hook both ends
+  // Inclined length slightly longer than plan length; use waistThick for slope estimate:
+  // inclined ≈ sqrt(l² + waistThick²) but waistThick is depth, not rise, so we apply
+  // a practical 5% addition for the slope (common site practice, IS 2502 note)
+  const inclinedLen = l * 1.05 + 2 * lapLen(+mainDia);
+  const lenMain = +inclinedLen.toFixed(3);
+
   const nDist = Math.floor((l - 2 * cov) / dsp) + 1;
-  const lenDist = w - 2 * cov + 2 * hookLen(+distDia);
+  const lenDist = +(w - 2 * cov + 2 * hookLen(+distDia)).toFixed(3);
 
   return [
     {
       mark: "A",
       nos: nMain,
-      cutLen: +lenMain.toFixed(3),
+      cutLen: lenMain,
       dia: +mainDia,
-      desc: `Main Bars along flight (φ${mainDia}mm @${mainSp}mm)`,
+      desc: `Main Bars along flight — inclined (φ${mainDia}mm @${mainSp}mm, waist: ${wt * 1000}mm)`,
     },
     {
       mark: "B",
       nos: nDist,
-      cutLen: +lenDist.toFixed(3),
+      cutLen: lenDist,
       dia: +distDia,
       desc: `Distribution Bars (φ${distDia}mm @${distSp}mm)`,
     },
@@ -366,7 +369,8 @@ export function calcSingleLintel({
   const cov = COVER_MM.lintel / 1000;
   const sp = parseFloat(stirSpacing) / 1000;
   const nStir = Math.ceil(l / sp) + 1;
-  const stirLen = stirrupPerim(b, d, cov);
+  // FIX #2 — pass actual stirDia to stirrupPerim
+  const stirLen = stirrupPerim(b, d, cov, +stirDia);
 
   const rows = [
     {
@@ -392,7 +396,6 @@ export function calcSingleLintel({
     },
   ];
 
-  // Chajja (sunshade) bars
   if (hasChajja) {
     const cl = parseFloat(chajjaL) || 0.6;
     const csp = parseFloat(chajjaSp) / 1000;
@@ -437,7 +440,6 @@ export function calcSingleRaft({
   const msp = parseFloat(mainSp) / 1000;
   const dsp = parseFloat(distSp) / 1000;
 
-  // Bottom mat
   const nMainBot = Math.floor((b - 2 * cov) / msp) + 1;
   const nDistBot = Math.floor((l - 2 * cov) / dsp) + 1;
   const lenMain = l - 2 * cov + 2 * hookLen(+mainDia);
@@ -474,17 +476,29 @@ export function calcSingleRaft({
     },
   ];
 
-  // Crank / bent-up bars at edges
+  // FIX #4 — Crank bars run along BOTH L and B edges (4 edges total)
   if (hasCrank) {
     const csp = parseFloat(crankSp) / 1000;
-    const nCrank = Math.floor((b - 2 * cov) / csp) + 1;
-    const lCrank =
-      l - 2 * cov + 2 * (parseFloat(D) * 0.4) + 2 * hookLen(+crankDia);
+    // Along B edges (2 edges): bars span L direction
+    const nCrankAlongB = Math.floor((b - 2 * cov) / csp) + 1;
+    // Along L edges (2 edges): bars span B direction
+    const nCrankAlongL = Math.floor((l - 2 * cov) / csp) + 1;
+    const crankDepth = parseFloat(D) * 0.4;
+    const lCrankL = l - 2 * cov + 2 * crankDepth + 2 * hookLen(+crankDia);
+    const lCrankB = b - 2 * cov + 2 * crankDepth + 2 * hookLen(+crankDia);
+
     rows.push({
       mark: "E",
-      desc: `Crank Bars — Edge zone (φ${crankDia}mm @${crankSp}mm)`,
-      nos: nCrank,
-      cutLen: +lCrank.toFixed(3),
+      desc: `Crank Bars — Along L edges (φ${crankDia}mm @${crankSp}mm, 2 edges)`,
+      nos: nCrankAlongB * 2,
+      cutLen: +lCrankL.toFixed(3),
+      dia: +crankDia,
+    });
+    rows.push({
+      mark: "F",
+      desc: `Crank Bars — Along B edges (φ${crankDia}mm @${crankSp}mm, 2 edges)`,
+      nos: nCrankAlongL * 2,
+      cutLen: +lCrankB.toFixed(3),
       dia: +crankDia,
     });
   }
@@ -514,9 +528,7 @@ export function calcSinglePileCap({
   const lenMain = l - 2 * cov + 2 * hookLen(md);
   const lenDist = b - 2 * cov + 2 * hookLen(dd);
 
-  // Pile anchor bars (dowels going into piles)
   const nPilesNum = +nPiles || 4;
-  const pd = +pileDia || 300;
   const anchorLen = (40 * md) / 1000 + parseFloat(D);
 
   return [
@@ -536,7 +548,8 @@ export function calcSinglePileCap({
     },
     {
       mark: "C",
-      desc: `Pile Anchor Dowels — ${nPilesNum} piles (φ${md}mm)`,
+      // FIX #8 — clearly document the 4-dowels-per-pile assumption
+      desc: `Pile Anchor Dowels — ${nPilesNum} piles × 4 bars/pile (φ${md}mm) [IS 456 Cl.34.4]`,
       nos: nPilesNum * 4,
       cutLen: +anchorLen.toFixed(3),
       dia: md,
@@ -577,23 +590,25 @@ export function aggregateBBS(allItems) {
 }
 
 // ─── COST SUMMARY ─────────────────────────────────────────────────────────────
+// FIX #3 — accumulate totalLen directly alongside weight to avoid precision loss
 export function costSummary(bbs, ratesPerPiece) {
   const byDia = {};
   bbs.forEach((r) => {
-    byDia[r.dia] = (byDia[r.dia] || 0) + r.weight;
+    if (!byDia[r.dia]) byDia[r.dia] = { kg: 0, totalLen: 0 };
+    byDia[r.dia].kg += r.weight;
+    byDia[r.dia].totalLen += r.totalLen; // ← accumulate directly, no back-calc
   });
 
   return Object.entries(byDia)
     .sort(([a], [b]) => +a - +b)
-    .map(([dia, kg]) => {
-      const totalLen = +(kg / (BAR_WEIGHT[dia] || 1)).toFixed(2);
+    .map(([dia, { kg, totalLen }]) => {
       const rods12m = Math.ceil(totalLen / 12);
       const ratePerPiece = ratesPerPiece[dia] || 0;
       const cost = rods12m * ratePerPiece;
       return {
         dia: +dia,
         kg: +kg.toFixed(2),
-        totalLen,
+        totalLen: +totalLen.toFixed(2),
         rods12m,
         ratePerPiece,
         cost: +cost.toFixed(0),

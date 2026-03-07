@@ -53,8 +53,10 @@ export default function App() {
   const [details, setDetails] = useState(DEFAULT_PROJECT);
   const [rates, setRates] = useState({ ...DEFAULT_RATES_PER_PIECE });
   const [result, setResult] = useState(null);
+  // FIX #8 — surface localStorage errors to the user
+  const [saveError, setSaveError] = useState(null);
 
-  // ─── Element state ──────────────────────────────────────────────────────────
+  // ─── Element state ─────────────────────────────────────────────────────────
   const [footings, setFootings] = useState([
     { ...newItem("footing"), label: "Footing F1", count: 4 },
   ]);
@@ -99,11 +101,11 @@ export default function App() {
     { type: "pileCap", items: pileCaps },
   ];
 
-  // ─── Derived ────────────────────────────────────────────────────────────────
+  // ─── Derived ───────────────────────────────────────────────────────────────
   const projectReady = details.projectName.trim().length > 0;
   const updateRate = (dia, val) => setRates((p) => ({ ...p, [dia]: val }));
 
-  // ─── Actions ─────────────────────────────────────────────────────────────────
+  // ─── Actions ────────────────────────────────────────────────────────────────
   const handleCalculate = useCallback(() => {
     const byType = allItemsByType.map(({ type, items }) => ({
       type,
@@ -115,13 +117,25 @@ export default function App() {
     const data = { byType, allRows, costs };
 
     setResult(data);
-    saveReport({
+
+    // FIX #8 — show feedback if save fails (e.g. quota exceeded)
+    const saveResult = saveReport({
       details: { ...details },
       byType,
       allRows,
       costs,
       rates: { ...rates },
     });
+    if (!saveResult.ok) {
+      setSaveError(
+        saveResult.quota
+          ? "⚠️ Report generated but could not be saved — browser storage is full. Clear old reports to free space."
+          : "⚠️ Report generated but could not be saved to history due to a storage error.",
+      );
+    } else {
+      setSaveError(null);
+    }
+
     setViewMode("result");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [
@@ -150,7 +164,7 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // ─── Render ──────────────────────────────────────────────────────────────────
+  // ─── Render ────────────────────────────────────────────────────────────────
   return (
     <div style={{ minHeight: "100vh" }}>
       <Header
@@ -159,6 +173,37 @@ export default function App() {
         onViewHistory={() => setViewMode("history")}
         showHistoryButton={viewMode !== "history"}
       />
+
+      {/* FIX #8 — storage error banner */}
+      {saveError && (
+        <div
+          style={{
+            background: "#fffbeb",
+            borderBottom: "1px solid #fde68a",
+            padding: "10px 28px",
+            fontSize: 12,
+            color: "#92400e",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+          }}
+        >
+          <span>{saveError}</span>
+          <button
+            onClick={() => setSaveError(null)}
+            style={{
+              marginLeft: "auto",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "#92400e",
+              fontSize: 16,
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {viewMode === "history" && (
         <HistoryPage

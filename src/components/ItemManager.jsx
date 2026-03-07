@@ -24,11 +24,10 @@ export const DEFAULTS = {
     mainDia: "12",
     distDia: "12",
     spacing: "150",
-    // ── Stub column (footing top → plinth beam soffit) ──
     hasStub: false,
-    stubH: "0.45", // metres — typical ground floor stub height
-    colDia: "16", // column main bar dia (for starter bars)
-    colNos: "4", // number of starter/dowel bars
+    stubH: "0.45",
+    colDia: "16",
+    colNos: "4",
   },
   column: {
     label: "Column C1",
@@ -148,8 +147,14 @@ export const DEFAULTS = {
   },
 };
 
-let _id = 0;
-export const newItem = (type) => ({ id: ++_id, ...DEFAULTS[type] });
+// FIX #6 — use crypto.randomUUID() so IDs are stable even in React 18 StrictMode
+// double-invocation, avoiding the stale module-level counter problem.
+const genId = () =>
+  typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+export const newItem = (type) => ({ id: genId(), ...DEFAULTS[type] });
 
 const MF = ({ label, value, onChange }) => (
   <Field
@@ -205,7 +210,6 @@ function FootingForm({ item, onChange }) {
         />
       </div>
 
-      {/* ── Stub Column / Pedestal Panel ── */}
       <div className="feature-panel feature-panel--stub">
         <label className="feature-panel__toggle">
           <input
@@ -221,8 +225,8 @@ function FootingForm({ item, onChange }) {
             <div className="stub-info-note">
               📐 <b>Stub = Footing top to Plinth Beam soffit.</b> Starter bars
               go <b>40d into footing</b> + stub height +{" "}
-              <b>40d lap into superstructure column</b> (IS 456 Cl.26.2). Ties @
-              150mm (dense zone as per IS 456 Cl.26.5.3).
+              <b>40d lap into superstructure column</b> (IS 456 Cl.26.2). Ties
+              @150mm (dense zone as per IS 456 Cl.26.5.3).
             </div>
             <div className="feature-panel__body form-grid">
               <MF
@@ -378,6 +382,9 @@ function BeamForm({ item, onChange }) {
 
 function SlabForm({ item, onChange }) {
   const u = (k) => (v) => onChange(k, v);
+  const lbRatio = +item.L / +item.B;
+  const autoIs1Way = lbRatio > 2;
+
   return (
     <div className="form-grid">
       <div className="field">
@@ -389,6 +396,19 @@ function SlabForm({ item, onChange }) {
           <option value="1-way">1-Way Slab (Ly/Lx &gt; 2)</option>
           <option value="2-way">2-Way Slab (Ly/Lx &lt; 2)</option>
         </select>
+        {/* Warn user when ratio conflicts with selection */}
+        {autoIs1Way && item.slabType === "2-way" && (
+          <div
+            style={{
+              marginTop: 4,
+              fontSize: 10,
+              color: "#d97706",
+              fontFamily: "var(--font-mono)",
+            }}
+          >
+            ⚠️ Ly/Lx = {lbRatio.toFixed(2)} &gt; 2 — behaves as 1-way slab
+          </div>
+        )}
       </div>
       <div />
       <MF label="Span Lx (shorter)" value={item.L} onChange={u("L")} />
@@ -624,6 +644,17 @@ function PileCapForm({ item, onChange }) {
         value={item.distDia}
         onChange={u("distDia")}
       />
+      <div
+        style={{
+          gridColumn: "1 / -1",
+          fontSize: 11,
+          color: "var(--text-3)",
+          fontFamily: "var(--font-mono)",
+          padding: "6px 0",
+        }}
+      >
+        ℹ️ Anchor dowels calculated as 4 bars per pile (IS 456 Cl.34.4)
+      </div>
     </div>
   );
 }

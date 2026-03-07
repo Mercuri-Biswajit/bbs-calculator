@@ -834,15 +834,27 @@ export function DrawingSlab({
 // Add this to src/utils/drawings.jsx
 
 // 🆕 ─── STAIRCASE DRAWING ────────────────────────────────────────────────────
-export function DrawingStaircase({ flightLen, width, mainDia, mainSp, distDia, distSp }) {
-  const l = +flightLen || 3.5, w = +width || 1.2;
-  const W = 420, H = 300, scale = 60;
-  const fw = Math.min(l * scale, 240), ww = Math.min(w * scale, 140);
-  const ox = (W - fw) / 2, oy = (H - ww) / 2 + 10;
+export function DrawingStaircase({
+  flightLen,
+  width,
+  mainDia,
+  mainSp,
+  distDia,
+  distSp,
+}) {
+  const l = +flightLen || 3.5,
+    w = +width || 1.2;
+  const W = 420,
+    H = 300,
+    scale = 60;
+  const fw = Math.min(l * scale, 240),
+    ww = Math.min(w * scale, 140);
+  const ox = (W - fw) / 2,
+    oy = (H - ww) / 2 + 10;
   const cov = (25 / 1000) * scale;
 
-  const msp = (+mainSp || 150) / 1000 * scale;
-  const dsp = (+distSp || 200) / 1000 * scale;
+  const msp = ((+mainSp || 150) / 1000) * scale;
+  const dsp = ((+distSp || 200) / 1000) * scale;
 
   // Main bars along flight
   const mBars = [];
@@ -853,45 +865,92 @@ export function DrawingStaircase({ flightLen, width, mainDia, mainSp, distDia, d
   for (let x = 0; x < fw + 0.5; x += dsp) dBars.push(x);
 
   return (
-    <BlueprintSVG width={W} height={H} title={`STAIRCASE — PLAN VIEW  |  Cover: 25mm  |  IS 456`}>
+    <BlueprintSVG
+      width={W}
+      height={H}
+      title={`STAIRCASE — PLAN VIEW  |  Cover: 25mm  |  IS 456`}
+    >
       {/* Flight outline */}
-      <rect x={ox} y={oy} width={fw} height={ww} fill="url(#hatch)" stroke={DC.outline} strokeWidth="2" />
-      
+      <rect
+        x={ox}
+        y={oy}
+        width={fw}
+        height={ww}
+        fill="url(#hatch)"
+        stroke={DC.outline}
+        strokeWidth="2"
+      />
+
       {/* Distribution bars (across width) */}
       {dBars.map((x, i) => (
-        <line key={`d${i}`} x1={ox+x} y1={oy} x2={ox+x} y2={oy+ww} stroke={DC.dist} strokeWidth="1.2" />
+        <line
+          key={`d${i}`}
+          x1={ox + x}
+          y1={oy}
+          x2={ox + x}
+          y2={oy + ww}
+          stroke={DC.dist}
+          strokeWidth="1.2"
+        />
       ))}
-      
+
       {/* Main bars (along flight length) */}
       {mBars.map((y, i) => (
-        <line key={`m${i}`} x1={ox} y1={oy+y} x2={ox+fw} y2={oy+y} stroke={DC.main} strokeWidth="1.5" />
+        <line
+          key={`m${i}`}
+          x1={ox}
+          y1={oy + y}
+          x2={ox + fw}
+          y2={oy + y}
+          stroke={DC.main}
+          strokeWidth="1.5"
+        />
       ))}
-      
+
       {/* Steps indication (visual only) */}
-      {Array.from({length: 8}).map((_, i) => {
+      {Array.from({ length: 8 }).map((_, i) => {
         const stepX = ox + (fw / 8) * i;
         return (
-          <line 
-            key={`step${i}`} 
-            x1={stepX} 
-            y1={oy} 
-            x2={stepX} 
-            y2={oy+ww} 
-            stroke={DC.outline} 
-            strokeWidth="0.5" 
-            strokeDasharray="3,3" 
+          <line
+            key={`step${i}`}
+            x1={stepX}
+            y1={oy}
+            x2={stepX}
+            y2={oy + ww}
+            stroke={DC.outline}
+            strokeWidth="0.5"
+            strokeDasharray="3,3"
             opacity="0.3"
           />
         );
       })}
-      
-      <DimLine x1={ox} y1={oy+ww} x2={ox+fw} y2={oy+ww} label={`Flight: ${l}m`} offset={20} />
-      <DimLine x1={ox} y1={oy} x2={ox} y2={oy+ww} label={`Width: ${w}m`} offset={-20} vertical />
-      
-      <Legend x={W-140} y={oy} items={[
-        { color: DC.main, label: `Main φ${mainDia}@${mainSp}`, type: 'line' },
-        { color: DC.dist, label: `Dist φ${distDia}@${distSp}`, type: 'line' },
-      ]} />
+
+      <DimLine
+        x1={ox}
+        y1={oy + ww}
+        x2={ox + fw}
+        y2={oy + ww}
+        label={`Flight: ${l}m`}
+        offset={20}
+      />
+      <DimLine
+        x1={ox}
+        y1={oy}
+        x2={ox}
+        y2={oy + ww}
+        label={`Width: ${w}m`}
+        offset={-20}
+        vertical
+      />
+
+      <Legend
+        x={W - 140}
+        y={oy}
+        items={[
+          { color: DC.main, label: `Main φ${mainDia}@${mainSp}`, type: "line" },
+          { color: DC.dist, label: `Dist φ${distDia}@${distSp}`, type: "line" },
+        ]}
+      />
     </BlueprintSVG>
   );
 }

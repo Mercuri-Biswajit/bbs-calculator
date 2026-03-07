@@ -1,5 +1,5 @@
 // src/components/ItemManager.jsx
-// ALL dimensions in METRES. ALL spacings in mm. No unit selector — no conversion bugs.
+// ALL dimensions in METRES. ALL spacings in mm.
 
 import { useState } from "react";
 import { Card, Field, DiaSelect, Button, Badge } from "./ui.jsx";
@@ -93,7 +93,6 @@ export const DEFAULTS = {
 let _id = 0;
 export const newItem = (type) => ({ id: ++_id, ...DEFAULTS[type] });
 
-// Shorthand field components
 const MF = ({ label, value, onChange }) => (
   <Field
     label={label}
@@ -125,7 +124,7 @@ const NF = ({ label, value, onChange }) => (
   />
 );
 
-// ─── FORMS ───────────────────────────────────────────────────────────────────
+// ─── FORMS ────────────────────────────────────────────────────────────────────
 
 function FootingForm({ item, onChange }) {
   const u = (k) => (v) => onChange(k, v);
@@ -227,23 +226,11 @@ function SlabForm({ item, onChange }) {
   const u = (k) => (v) => onChange(k, v);
   return (
     <div className="form-grid">
-      <div style={{ marginBottom: 10 }}>
-        <label
-          style={{
-            fontSize: 11,
-            color: "var(--text2)",
-            fontWeight: 600,
-            display: "block",
-            marginBottom: 4,
-            letterSpacing: 0.4,
-          }}
-        >
-          Slab Type
-        </label>
+      <div style={{ marginBottom: 12 }}>
+        <label className="field__label">Slab Type</label>
         <select
           value={item.slabType || "2-way"}
           onChange={(e) => u("slabType")(e.target.value)}
-          style={{ padding: "7px 10px" }}
         >
           <option value="1-way">1-Way Slab (Ly/Lx &gt; 2)</option>
           <option value="2-way">2-Way Slab (Ly/Lx &lt; 2)</option>
@@ -368,76 +355,26 @@ function ItemCard({ item, type, onChange, onRemove, index }) {
   const Form = getForm(type);
 
   return (
-    <Card style={{ marginBottom: 12 }} className="fade-in">
+    <Card className="item-card fade-in">
       {/* Header */}
-      <div
-        className="item-hdr"
-        style={{
-          padding: "10px 14px",
-          background: "var(--surface2)",
-          borderBottom: "1px solid var(--border2)",
-          borderRadius: "var(--radius) var(--radius) 0 0",
-          gap: 10,
-        }}
-      >
+      <div className="item-card__header item-hdr">
         <Badge label={`#${index + 1}`} color={TYPE_COLORS[type]} />
         <input
           value={item.label}
           onChange={(e) => onChange("label", e.target.value)}
-          style={{
-            flex: 1,
-            minWidth: 60,
-            border: "none",
-            background: "transparent",
-            fontWeight: 600,
-            fontSize: 13,
-            color: "var(--text)",
-            outline: "none",
-            fontFamily: "var(--font-sans)",
-          }}
+          className="item-card__label-input"
         />
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            background: "white",
-            border: "1px solid var(--border)",
-            borderRadius: 6,
-            padding: "3px 8px",
-            flexShrink: 0,
-          }}
-        >
-          <span
-            style={{
-              fontSize: 11,
-              color: "var(--text3)",
-              fontWeight: 600,
-              whiteSpace: "nowrap",
-            }}
-          >
-            Qty:
-          </span>
+        <div className="item-card__qty">
+          <span className="item-card__qty-label">Qty:</span>
           <input
             type="number"
             min="1"
             step="1"
             value={item.count}
             onChange={(e) => onChange("count", Math.max(1, +e.target.value))}
-            style={{
-              width: 48,
-              border: "none",
-              textAlign: "center",
-              fontFamily: "var(--font-mono)",
-              fontWeight: 700,
-              color: "var(--primary)",
-              fontSize: 14,
-              background: "transparent",
-              outline: "none",
-              padding: 0,
-            }}
+            className="item-card__qty-input"
           />
-          <span style={{ fontSize: 11, color: "var(--text3)" }}>nos</span>
+          <span style={{ fontSize: 11, color: "var(--text-3)" }}>nos</span>
         </div>
         <Button
           size="sm"
@@ -459,35 +396,12 @@ function ItemCard({ item, type, onChange, onRemove, index }) {
       </div>
 
       {showDrawing && !collapsed && (
-        <div
-          style={{
-            padding: "14px 18px",
-            background: "var(--primary-light)",
-            borderBottom: "1px solid var(--border2)",
-            overflowX: "auto",
-          }}
-        >
-          {getDrawing(type, item)}
-        </div>
+        <div className="drawing-panel">{getDrawing(type, item)}</div>
       )}
 
       {!collapsed && (
-        <div style={{ padding: "14px 18px" }}>
-          {/* Unit reminder */}
-          <div
-            style={{
-              marginBottom: 12,
-              padding: "7px 12px",
-              background: "#fffbe6",
-              border: "1px solid #ffe082",
-              borderRadius: 6,
-              fontSize: 11,
-              color: "#7d5000",
-              display: "flex",
-              gap: 8,
-              alignItems: "center",
-            }}
-          >
+        <div style={{ padding: "16px 20px" }}>
+          <div className="item-card__unit-reminder">
             <span>📐</span>
             <span>
               <b>Dimensions → metres (m)</b> &nbsp;·&nbsp;{" "}
@@ -532,6 +446,7 @@ export function ItemManager({ type, items, setItems }) {
     );
   const removeItem = (id) =>
     setItems((prev) => prev.filter((it) => it.id !== id));
+
   const totalCount = items.reduce((s, it) => s + (+it.count || 1), 0);
   const typeLabels = {
     footing: "Footings",
@@ -549,23 +464,23 @@ export function ItemManager({ type, items, setItems }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: 14,
+          marginBottom: 16,
           flexWrap: "wrap",
-          gap: 8,
+          gap: 10,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 20 }}>{TYPE_ICONS[type]}</span>
+          <span style={{ fontSize: 22 }}>{TYPE_ICONS[type]}</span>
           <div>
             <div
-              style={{ fontWeight: 700, fontSize: 14, color: "var(--text)" }}
+              style={{ fontWeight: 700, fontSize: 15, color: "var(--text)" }}
             >
               {typeLabels[type]}
             </div>
             <div
               style={{
                 fontSize: 11,
-                color: "var(--text3)",
+                color: "var(--text-3)",
                 fontFamily: "var(--font-mono)",
               }}
             >
@@ -579,23 +494,12 @@ export function ItemManager({ type, items, setItems }) {
       </div>
 
       {items.length === 0 && (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "32px 20px",
-            color: "var(--text3)",
-            border: "2px dashed var(--border)",
-            borderRadius: "var(--radius)",
-            background: "var(--surface2)",
-          }}
-        >
-          <div style={{ fontSize: 32, marginBottom: 8 }}>
-            {TYPE_ICONS[type]}
-          </div>
-          <div style={{ fontWeight: 600, marginBottom: 4 }}>
+        <div className="empty-state">
+          <div className="empty-state__icon">{TYPE_ICONS[type]}</div>
+          <div className="empty-state__title">
             No {typeLabels[type]} added yet
           </div>
-          <div style={{ fontSize: 12 }}>Click "+ Add" to start</div>
+          <div className="empty-state__sub">Click "+ Add" to start</div>
         </div>
       )}
 

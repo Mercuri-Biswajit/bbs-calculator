@@ -1,5 +1,4 @@
 // src/components/ProjectDetails.jsx
-// Desktop: unchanged. Mobile: stacked columns, no zoom on focus.
 
 import { useState } from "react";
 import { Card, CardHeader } from "./ui.jsx";
@@ -30,19 +29,10 @@ function TF({
   hint = "",
 }) {
   return (
-    <div style={{ marginBottom: 12 }}>
-      <label
-        style={{
-          fontSize: 11,
-          fontWeight: 600,
-          color: "#4a5568",
-          display: "block",
-          marginBottom: 4,
-          letterSpacing: 0.4,
-        }}
-      >
+    <div style={{ marginBottom: 14 }}>
+      <label className="proj-field-label">
         {label}
-        {required && <span style={{ color: "#c0392b", marginLeft: 3 }}>*</span>}
+        {required && <span className="proj-required">*</span>}
       </label>
       <input
         type={type}
@@ -50,61 +40,24 @@ function TF({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         style={{
-          width: "100%",
-          border: "1.5px solid #d0dce8",
-          borderRadius: 6,
-          padding: "8px 11px",
-          color: "#1a2535",
           fontFamily: type === "tel" ? "var(--font-mono)" : "var(--font-sans)",
-          background: "#fff",
-          outline: "none",
-          boxSizing: "border-box",
-          transition: "border-color .15s",
         }}
-        onFocus={(e) => (e.target.style.borderColor = "#1565c0")}
-        onBlur={(e) => (e.target.style.borderColor = "#d0dce8")}
       />
-      {hint && (
-        <div style={{ fontSize: 10, color: "#8090a8", marginTop: 3 }}>
-          {hint}
-        </div>
-      )}
+      {hint && <div className="field__hint">{hint}</div>}
     </div>
   );
 }
 
 function TA({ label, value, onChange, placeholder = "", rows = 2 }) {
   return (
-    <div style={{ marginBottom: 12 }}>
-      <label
-        style={{
-          fontSize: 11,
-          fontWeight: 600,
-          color: "#4a5568",
-          display: "block",
-          marginBottom: 4,
-          letterSpacing: 0.4,
-        }}
-      >
-        {label}
-      </label>
+    <div style={{ marginBottom: 14 }}>
+      <label className="proj-field-label">{label}</label>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        style={{
-          width: "100%",
-          border: "1.5px solid #d0dce8",
-          borderRadius: 6,
-          padding: "8px 11px",
-          color: "#1a2535",
-          fontFamily: "var(--font-sans)",
-          background: "#fff",
-          outline: "none",
-          boxSizing: "border-box",
-          resize: "vertical",
-        }}
+        style={{ resize: "vertical" }}
       />
     </div>
   );
@@ -115,7 +68,7 @@ export default function ProjectDetails({ details, setDetails }) {
   const [open, setOpen] = useState(true);
 
   return (
-    <Card style={{ marginBottom: 20 }}>
+    <Card style={{ marginBottom: 22 }}>
       <CardHeader
         icon="📋"
         title="Project & Client Details"
@@ -123,14 +76,7 @@ export default function ProjectDetails({ details, setDetails }) {
         action={
           <button
             onClick={() => setOpen((v) => !v)}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "#1565c0",
-              fontSize: 13,
-              fontWeight: 600,
-            }}
+            className="btn btn--ghost btn--sm"
           >
             {open ? "▲ Collapse" : "▼ Expand"}
           </button>
@@ -138,8 +84,8 @@ export default function ProjectDetails({ details, setDetails }) {
       />
 
       {open && (
-        <div style={{ padding: "18px 20px" }}>
-          {/* Row 1: Project + Ref + Date */}
+        <div style={{ padding: "20px 22px" }}>
+          {/* Row 1 */}
           <div className="proj-row1">
             <TF
               label="Project Name"
@@ -163,25 +109,11 @@ export default function ProjectDetails({ details, setDetails }) {
             />
           </div>
 
-          {/* Client + Engineer — 2 col desktop, 1 col mobile */}
+          {/* 2-col: Client + Engineer */}
           <div className="proj-cols">
             {/* CLIENT */}
             <div>
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: "#1565c0",
-                  borderBottom: "2px solid #e3eefb",
-                  paddingBottom: 6,
-                  marginBottom: 12,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                👤 Client Details
-              </div>
+              <div className="proj-section-title">👤 Client Details</div>
               <TF
                 label="Client Name"
                 value={details.clientName}
@@ -206,19 +138,7 @@ export default function ProjectDetails({ details, setDetails }) {
 
             {/* ENGINEER */}
             <div>
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: "#1565c0",
-                  borderBottom: "2px solid #e3eefb",
-                  paddingBottom: 6,
-                  marginBottom: 12,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
+              <div className="proj-section-title">
                 🧑‍💼 Engineer / Firm Details
               </div>
               <TF
@@ -243,33 +163,15 @@ export default function ProjectDetails({ details, setDetails }) {
               />
 
               {/* WhatsApp */}
-              <div style={{ marginBottom: 12 }}>
+              <div style={{ marginBottom: 14 }}>
                 <label
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: "#1a7a3c",
-                    display: "block",
-                    marginBottom: 4,
-                    letterSpacing: 0.4,
-                  }}
+                  className="proj-field-label"
+                  style={{ color: "#059669" }}
                 >
-                  📱 WhatsApp Number <span style={{ color: "#c0392b" }}>*</span>
+                  📱 WhatsApp Number <span className="proj-required">*</span>
                 </label>
-                <div style={{ position: "relative" }}>
-                  <span
-                    style={{
-                      position: "absolute",
-                      left: 10,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      fontSize: 13,
-                      color: "#4a5568",
-                      fontFamily: "var(--font-mono)",
-                    }}
-                  >
-                    +91
-                  </span>
+                <div className="wa-input-wrap">
+                  <span className="wa-input-prefix">+91</span>
                   <input
                     type="tel"
                     value={details.engineerPhone}
@@ -280,32 +182,12 @@ export default function ProjectDetails({ details, setDetails }) {
                     }
                     placeholder="9876543210"
                     maxLength={10}
-                    style={{
-                      width: "100%",
-                      border: "2px solid #25d366",
-                      borderRadius: 6,
-                      padding: "8px 11px 8px 40px",
-                      color: "#1a2535",
-                      fontFamily: "var(--font-mono)",
-                      fontWeight: 600,
-                      background: "#f0fff4",
-                      outline: "none",
-                      boxSizing: "border-box",
-                    }}
+                    className="wa-input"
+                    style={{ paddingLeft: "44px" }}
                   />
-                  <span
-                    style={{
-                      position: "absolute",
-                      right: 10,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      fontSize: 18,
-                    }}
-                  >
-                    💬
-                  </span>
+                  <span className="wa-input-suffix">💬</span>
                 </div>
-                <div style={{ fontSize: 10, color: "#1a7a3c", marginTop: 3 }}>
+                <div className="wa-hint">
                   ✓ Report PDF will be sent directly to this WhatsApp number
                 </div>
               </div>

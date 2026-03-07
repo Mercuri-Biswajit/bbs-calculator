@@ -1,5 +1,4 @@
 // src/components/BBSResults.jsx
-// Desktop: unchanged. Mobile: tables scroll horizontally, cost grid stacks.
 
 import {
   BAR_WEIGHT,
@@ -13,46 +12,32 @@ export function BBSTable({ rows, showSource = true }) {
 
   return (
     <div className="tbl-wrap">
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          fontSize: 12,
-          fontFamily: "var(--font-mono)",
-          minWidth: 560,
-        }}
-      >
+      <table className="bbs-table">
         <thead>
-          <tr style={{ background: "#eaf2fb" }}>
-            {showSource && <th style={th}>Element</th>}
-            <th style={th}>Mark</th>
-            <th style={{ ...th, textAlign: "left" }}>Description</th>
-            <th style={th}>Qty</th>
-            <th style={th}>Cut Length (m)</th>
-            <th style={th}>Total Length (m)</th>
-            <th style={th}>Unit Wt (kg/m)</th>
-            <th style={{ ...th, color: "var(--red)" }}>Weight (kg)</th>
+          <tr>
+            {showSource && <th>Element</th>}
+            <th>Mark</th>
+            <th style={{ textAlign: "left" }}>Description</th>
+            <th>Qty</th>
+            <th>Cut Length (m)</th>
+            <th>Total Length (m)</th>
+            <th>Unit Wt (kg/m)</th>
+            <th style={{ color: "var(--red)" }}>Weight (kg)</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r, i) => (
-            <tr
-              key={i}
-              style={{
-                background: i % 2 === 0 ? "var(--row-even)" : "var(--row-odd)",
-              }}
-            >
+            <tr key={i}>
               {showSource && (
                 <td
                   style={{
-                    ...td,
                     maxWidth: 140,
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                   }}
                 >
-                  <span style={{ fontSize: 11, color: "var(--text2)" }}>
+                  <span style={{ fontSize: 11, color: "var(--text-2)" }}>
                     {r.sourceLabel}
                   </span>
                   {r.count > 1 && (
@@ -69,12 +54,11 @@ export function BBSTable({ rows, showSource = true }) {
                   )}
                 </td>
               )}
-              <td style={{ ...td, textAlign: "center" }}>
+              <td style={{ textAlign: "center" }}>
                 <Badge label={r.mark} color="blue" />
               </td>
               <td
                 style={{
-                  ...td,
                   color: "var(--text)",
                   textAlign: "left",
                   fontSize: 12,
@@ -82,13 +66,10 @@ export function BBSTable({ rows, showSource = true }) {
               >
                 {r.desc}
               </td>
-              <td style={{ ...td, textAlign: "center" }}>{r.nos}</td>
-              <td style={{ ...td, textAlign: "right" }}>
-                {r.cutLen.toFixed(3)}
-              </td>
+              <td style={{ textAlign: "center" }}>{r.nos}</td>
+              <td style={{ textAlign: "right" }}>{r.cutLen.toFixed(3)}</td>
               <td
                 style={{
-                  ...td,
                   textAlign: "right",
                   color: "var(--green)",
                   fontWeight: 600,
@@ -96,12 +77,11 @@ export function BBSTable({ rows, showSource = true }) {
               >
                 {r.totalLen.toFixed(3)}
               </td>
-              <td style={{ ...td, textAlign: "right", color: "var(--text2)" }}>
+              <td style={{ textAlign: "right", color: "var(--text-2)" }}>
                 {BAR_WEIGHT[r.dia] || "—"}
               </td>
               <td
                 style={{
-                  ...td,
                   textAlign: "right",
                   color: "var(--red)",
                   fontWeight: 700,
@@ -113,12 +93,7 @@ export function BBSTable({ rows, showSource = true }) {
           ))}
         </tbody>
         <tfoot>
-          <tr
-            style={{
-              background: "#deeefb",
-              borderTop: "2px solid var(--primary)",
-            }}
-          >
+          <tr>
             <td
               colSpan={showSource ? 7 : 6}
               style={{
@@ -159,22 +134,10 @@ export function GroupedBBSTable({ rows }) {
   return (
     <div>
       {Object.entries(groups).map(([label, groupRows]) => (
-        <div key={label} style={{ marginBottom: 16 }}>
-          <div
-            style={{
-              padding: "7px 14px",
-              background: "var(--primary-light)",
-              borderLeft: "3px solid var(--primary)",
-              marginBottom: 0,
-              fontSize: 12,
-              fontWeight: 700,
-              color: "var(--primary)",
-            }}
-          >
-            {label}{" "}
-            <span
-              style={{ fontWeight: 400, color: "var(--text3)", fontSize: 11 }}
-            >
+        <div key={label} style={{ marginBottom: 18 }}>
+          <div className="section-heading">
+            {label}
+            <span className="section-heading__count">
               — {groupRows[0]?.count} nos
             </span>
           </div>
@@ -190,70 +153,40 @@ export function CostTable({ costs, onRateChange, details, onSendBarOrder }) {
   const totalKg = costs.reduce((s, r) => s + r.kg, 0);
 
   return (
-    /* cost-grid: 2-col on desktop, 1-col on mobile (via CSS class) */
     <div className="cost-grid">
       {/* Purchase summary */}
       <div>
-        <div
-          style={{
-            fontWeight: 700,
-            fontSize: 12,
-            color: "var(--text)",
-            marginBottom: 10,
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
-        >
-          <span>📦</span> BARS TO PURCHASE — 12m Standard Rods
+        <div className="cost-section-title">
+          <span>📦</span> Bars to Purchase — 12m Standard Rods
         </div>
         <div className="tbl-wrap">
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: 12,
-              fontFamily: "var(--font-mono)",
-              minWidth: 300,
-            }}
-          >
+          <table className="cost-table">
             <thead>
-              <tr style={{ background: "#f0f4f8" }}>
+              <tr>
                 {["Dia", "Total Length", "Weight (kg)", "12m Rods Reqd"].map(
                   (h) => (
-                    <th key={h} style={{ ...th, fontSize: 11 }}>
-                      {h}
-                    </th>
+                    <th key={h}>{h}</th>
                   ),
                 )}
               </tr>
             </thead>
             <tbody>
               {costs.map((r, i) => (
-                <tr
-                  key={r.dia}
-                  style={{
-                    background: i % 2 === 0 ? "white" : "var(--row-odd)",
-                  }}
-                >
-                  <td style={{ ...td, color: "var(--red)", fontWeight: 700 }}>
+                <tr key={r.dia}>
+                  <td style={{ color: "var(--red)", fontWeight: 700 }}>
                     φ{r.dia}mm
                   </td>
-                  <td style={{ ...td, textAlign: "right" }}>{r.totalLen} m</td>
-                  <td style={{ ...td, textAlign: "right" }}>{r.kg} kg</td>
-                  <td
-                    style={{
-                      ...td,
-                      textAlign: "center",
-                      color: "var(--primary)",
-                      fontWeight: 700,
-                    }}
-                  >
+                  <td style={{ textAlign: "right" }}>{r.totalLen} m</td>
+                  <td style={{ textAlign: "right" }}>{r.kg} kg</td>
+                  <td style={{ textAlign: "center" }}>
                     <span
                       style={{
                         background: "var(--primary-light)",
-                        padding: "2px 8px",
-                        borderRadius: 4,
+                        color: "var(--primary)",
+                        padding: "3px 10px",
+                        borderRadius: 6,
+                        fontWeight: 700,
+                        fontSize: 12,
                       }}
                     >
                       {r.rods12m} rods
@@ -261,18 +194,18 @@ export function CostTable({ costs, onRateChange, details, onSendBarOrder }) {
                   </td>
                 </tr>
               ))}
-              <tr
-                style={{
-                  background: "#f0f4f8",
-                  borderTop: "2px solid var(--border)",
-                }}
-              >
-                <td colSpan={2} style={{ ...td, fontWeight: 700 }}>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td
+                  colSpan={2}
+                  style={{ padding: "9px 12px", fontWeight: 700 }}
+                >
                   TOTAL
                 </td>
                 <td
                   style={{
-                    ...td,
+                    padding: "9px 12px",
                     textAlign: "right",
                     fontWeight: 700,
                     color: "var(--primary-dark)",
@@ -282,7 +215,7 @@ export function CostTable({ costs, onRateChange, details, onSendBarOrder }) {
                 </td>
                 <td
                   style={{
-                    ...td,
+                    padding: "9px 12px",
                     textAlign: "center",
                     fontWeight: 700,
                     color: "var(--primary-dark)",
@@ -291,30 +224,15 @@ export function CostTable({ costs, onRateChange, details, onSendBarOrder }) {
                   {costs.reduce((s, r) => s + r.rods12m, 0)} rods
                 </td>
               </tr>
-            </tbody>
+            </tfoot>
           </table>
         </div>
 
         {onSendBarOrder && (
           <button
             onClick={onSendBarOrder}
-            style={{
-              width: "100%",
-              marginTop: 12,
-              background: "#25d366",
-              color: "#fff",
-              border: "none",
-              borderRadius: 6,
-              padding: "10px 16px",
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              boxShadow: "0 2px 8px rgba(37,211,102,.3)",
-            }}
+            className="btn btn--whatsapp btn--md"
+            style={{ width: "100%", marginTop: 14 }}
           >
             💬 Send Bar Order via WhatsApp
           </button>
@@ -323,61 +241,34 @@ export function CostTable({ costs, onRateChange, details, onSendBarOrder }) {
 
       {/* Cost estimate */}
       <div>
-        <div
-          style={{
-            fontWeight: 700,
-            fontSize: 12,
-            color: "var(--text)",
-            marginBottom: 10,
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
-        >
-          <span>💰</span> COST ESTIMATE — PER-PIECE RATE (12m rod)
+        <div className="cost-section-title">
+          <span>💰</span> Cost Estimate — Per-Piece Rate (12m rod)
         </div>
         <div className="tbl-wrap">
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: 12,
-              fontFamily: "var(--font-mono)",
-              minWidth: 280,
-            }}
-          >
+          <table className="cost-table">
             <thead>
-              <tr style={{ background: "#f0f4f8" }}>
+              <tr>
                 {["Dia", "12m Rods", "Rate (₹/pc)", "Amount (₹)"].map((h) => (
-                  <th key={h} style={{ ...th, fontSize: 11 }}>
-                    {h}
-                  </th>
+                  <th key={h}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {costs.map((r, i) => (
-                <tr
-                  key={r.dia}
-                  style={{
-                    background: i % 2 === 0 ? "white" : "var(--row-odd)",
-                  }}
-                >
-                  <td style={{ ...td, color: "var(--red)", fontWeight: 700 }}>
+                <tr key={r.dia}>
+                  <td style={{ color: "var(--red)", fontWeight: 700 }}>
                     φ{r.dia}mm
                   </td>
-                  <td style={{ ...td, textAlign: "center", fontWeight: 600 }}>
+                  <td style={{ textAlign: "center", fontWeight: 600 }}>
                     {r.rods12m} pcs
                   </td>
-                  <td
-                    style={{ ...td, textAlign: "center", padding: "4px 8px" }}
-                  >
+                  <td style={{ textAlign: "center", padding: "5px 8px" }}>
                     {onRateChange ? (
                       <input
                         type="number"
                         value={r.ratePerPiece}
                         onChange={(e) => onRateChange(r.dia, +e.target.value)}
-                        style={{ width: 74, textAlign: "center", fontSize: 12 }}
+                        style={{ width: 80, textAlign: "center", fontSize: 12 }}
                       />
                     ) : (
                       <span>₹{r.ratePerPiece}</span>
@@ -385,7 +276,6 @@ export function CostTable({ costs, onRateChange, details, onSendBarOrder }) {
                   </td>
                   <td
                     style={{
-                      ...td,
                       textAlign: "right",
                       color: "var(--green)",
                       fontWeight: 600,
@@ -397,16 +287,11 @@ export function CostTable({ costs, onRateChange, details, onSendBarOrder }) {
               ))}
             </tbody>
             <tfoot>
-              <tr
-                style={{
-                  background: "#eafaf1",
-                  borderTop: "2px solid var(--green)",
-                }}
-              >
+              <tr>
                 <td
                   colSpan={3}
                   style={{
-                    ...td,
+                    padding: "10px 12px",
                     fontWeight: 700,
                     color: "var(--green)",
                     fontSize: 13,
@@ -416,7 +301,7 @@ export function CostTable({ costs, onRateChange, details, onSendBarOrder }) {
                 </td>
                 <td
                   style={{
-                    ...td,
+                    padding: "10px 12px",
                     textAlign: "right",
                     fontWeight: 800,
                     color: "var(--green)",
@@ -433,7 +318,7 @@ export function CostTable({ costs, onRateChange, details, onSendBarOrder }) {
           style={{
             marginTop: 8,
             fontSize: 11,
-            color: "var(--text3)",
+            color: "var(--text-3)",
             fontStyle: "italic",
           }}
         >
@@ -443,14 +328,3 @@ export function CostTable({ costs, onRateChange, details, onSendBarOrder }) {
     </div>
   );
 }
-
-const th = {
-  padding: "8px 12px",
-  border: "1px solid var(--border)",
-  color: "var(--primary)",
-  fontWeight: 700,
-  textAlign: "center",
-  whiteSpace: "nowrap",
-  fontSize: 11,
-};
-const td = { padding: "7px 12px", border: "1px solid var(--border2)" };

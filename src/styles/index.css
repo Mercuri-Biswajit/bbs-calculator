@@ -1,0 +1,7 @@
+/* ─── MAIN STYLESHEET ENTRY POINT ─────────────────────────────────────────── */
+/* Import order matters — variables first, then base, layout, components      */
+
+@import './variables.css';
+@import './base.css';
+@import './layout.css';
+@import './components.css';

@@ -1,6 +1,4 @@
-// src/App.jsx
-// Desktop layout: UNCHANGED from original.
-// Mobile: CSS classes handle breakpoints (kpi-grid, action-bar, hscroll, calc-cta, page-pad).
+// src/App.jsx — Professional redesign with CSS-class driven styling
 
 import { useState, useCallback } from "react";
 import Header from "./components/Header.jsx";
@@ -30,12 +28,12 @@ import {
 import { downloadPDF, sendViaWhatsApp } from "./utils/pdfReport.js";
 
 const TABS = [
-  { id: "footing", icon: "🏗", label: "Footings", color: "#d35400" },
-  { id: "column", icon: "🏛", label: "Columns", color: "#1565c0" },
-  { id: "plinthBeam", icon: "🔩", label: "Plinth Beams", color: "#1e7e34" },
-  { id: "wallBeam", icon: "⚙️", label: "Wall Beams", color: "#6f42c1" },
-  { id: "slab", icon: "▦", label: "Slabs", color: "#c0392b" },
-  { id: "staircase", icon: "🪜", label: "Staircases", color: "#0e7490" },
+  { id: "footing", icon: "🏗", label: "Footings", color: "#d97706" },
+  { id: "column", icon: "🏛", label: "Columns", color: "#1e5cb8" },
+  { id: "plinthBeam", icon: "🔩", label: "Plinth Beams", color: "#059669" },
+  { id: "wallBeam", icon: "⚙️", label: "Wall Beams", color: "#7c3aed" },
+  { id: "slab", icon: "▦", label: "Slabs", color: "#dc2626" },
+  { id: "staircase", icon: "🪜", label: "Staircases", color: "#0d9488" },
 ];
 
 function calcItems(type, items) {
@@ -56,7 +54,7 @@ function calcItems(type, items) {
   });
 }
 
-// ─── RESULT PAGE ───────────────────────────────────────────────────────────────
+// ─── RESULT PAGE ──────────────────────────────────────────────────────────────
 function ResultPage({ result, rates, onRateChange, onBack, details }) {
   const [sending, setSending] = useState(false);
   const [sentMsg, setSentMsg] = useState("");
@@ -102,28 +100,23 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
     const message = encodeURIComponent(
       generateBarPurchaseMessage(costs, details),
     );
-    const phone = `91${details.engineerPhone}`;
-    window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+    window.open(
+      `https://wa.me/91${details.engineerPhone}?text=${message}`,
+      "_blank",
+    );
   };
 
-  // action-bar class makes it column + full-width on mobile
-  const ActionBar = ({ style }) => (
-    <div className="action-bar" style={style}>
+  const ActionBar = () => (
+    <div className="action-bar">
       <button
         onClick={handleDownload}
         disabled={dlBusy}
+        className="btn btn--secondary btn--md"
         style={{
-          background: dlBusy ? "#90a4ae" : "var(--primary)",
           color: "#fff",
-          border: "none",
-          borderRadius: 8,
-          padding: "11px 22px",
-          fontSize: 13,
-          fontWeight: 700,
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: 7,
+          background: dlBusy ? "#90a4ae" : "rgba(255,255,255,.15)",
+          border: "1px solid rgba(255,255,255,.3)",
+          backdropFilter: "blur(6px)",
         }}
       >
         {dlBusy ? "⏳ Generating…" : "⬇️ Download PDF"}
@@ -131,20 +124,7 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
       <button
         onClick={handleWhatsApp}
         disabled={sending}
-        style={{
-          background: sending ? "#90a4ae" : "#25d366",
-          color: "#fff",
-          border: "none",
-          borderRadius: 8,
-          padding: "11px 22px",
-          fontSize: 13,
-          fontWeight: 700,
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: 7,
-          boxShadow: "0 2px 8px rgba(37,211,102,.35)",
-        }}
+        className="btn btn--whatsapp btn--md"
       >
         {sending ? "⏳ Opening…" : "💬 Send Report via WhatsApp"}
       </button>
@@ -153,38 +133,33 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
-      {/* KPI Banner */}
-      <div
-        style={{
-          background: "linear-gradient(135deg,#1565c0,#0d47a1)",
-          padding: "22px 32px",
-        }}
-        className="page-pad"
-        /* page-pad class sets 32px on desktop, 14px on mobile */
-      >
-        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-          {/* Top row: back + project name + action bar */}
+      {/* ── Result Banner ── */}
+      <div className="result-banner page-pad" style={{ padding: "24px 32px" }}>
+        <div
+          style={{
+            maxWidth: 1400,
+            margin: "0 auto",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          {/* Top row */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
               gap: 12,
-              marginBottom: 18,
+              marginBottom: 20,
               flexWrap: "wrap",
             }}
           >
             <button
               onClick={onBack}
+              className="btn btn--sm"
               style={{
-                background: "rgba(255,255,255,.15)",
-                border: "1px solid rgba(255,255,255,.3)",
+                background: "rgba(255,255,255,.12)",
+                border: "1px solid rgba(255,255,255,.25)",
                 color: "#fff",
-                borderRadius: 6,
-                padding: "7px 16px",
-                cursor: "pointer",
-                fontSize: 12,
-                fontWeight: 600,
-                flexShrink: 0,
               }}
             >
               ← Back
@@ -192,30 +167,42 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
             {details.projectName && (
               <span
                 style={{
-                  color: "rgba(255,255,255,.85)",
+                  color: "rgba(255,255,255,.9)",
                   fontSize: 14,
-                  fontWeight: 600,
+                  fontWeight: 700,
+                  fontFamily: "var(--font-display)",
                 }}
               >
                 📌 {details.projectName}
               </span>
             )}
             {details.clientName && (
-              <span style={{ color: "rgba(255,255,255,.6)", fontSize: 12 }}>
+              <span
+                style={{
+                  color: "rgba(255,255,255,.55)",
+                  fontSize: 12,
+                  fontFamily: "var(--font-mono)",
+                }}
+              >
                 · {details.clientName}
               </span>
             )}
             {details.location && (
-              <span style={{ color: "rgba(255,255,255,.6)", fontSize: 12 }}>
+              <span
+                style={{
+                  color: "rgba(255,255,255,.45)",
+                  fontSize: 12,
+                  fontFamily: "var(--font-mono)",
+                }}
+              >
                 · {details.location}
               </span>
             )}
             <div style={{ flex: 1 }} />
-            {/* action-bar hidden here on very small screens; shown in bottom CTA instead */}
             <ActionBar />
           </div>
 
-          {/* KPIs: kpi-grid = 4-col desktop, 2-col mobile */}
+          {/* KPI grid */}
           <div className="kpi-grid">
             {[
               {
@@ -239,71 +226,24 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
                 sub: `${allRows.length} bar entries`,
               },
             ].map((k, i) => (
-              <div
-                key={i}
-                style={{
-                  background: "rgba(255,255,255,.13)",
-                  borderRadius: 10,
-                  padding: "14px 18px",
-                  border: "1px solid rgba(255,255,255,.2)",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: "rgba(255,255,255,.65)",
-                    fontWeight: 600,
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  {k.label}
-                </div>
-                <div
-                  style={{
-                    fontSize: 26,
-                    fontWeight: 800,
-                    color: "#fff",
-                    margin: "4px 0 2px",
-                  }}
-                >
-                  {k.value}
-                </div>
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,.5)" }}>
-                  {k.sub}
-                </div>
+              <div key={i} className="kpi-card">
+                <div className="kpi-card__label">{k.label}</div>
+                <div className="kpi-card__value">{k.value}</div>
+                <div className="kpi-card__sub">{k.sub}</div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* WhatsApp success msg */}
+      {/* WhatsApp success */}
       {sentMsg && (
-        <div
-          style={{
-            background: "#f0fff4",
-            borderBottom: "1px solid #25d366",
-            padding: "11px 24px",
-            fontSize: 13,
-            color: "#1a7a3c",
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-          }}
-        >
-          <span style={{ fontSize: 18 }}>💬</span>
+        <div className="wa-success">
+          <span className="wa-success__icon">💬</span>
           <span>{sentMsg}</span>
           <button
+            className="wa-success__dismiss"
             onClick={() => setSentMsg("")}
-            style={{
-              marginLeft: "auto",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "#666",
-              fontSize: 18,
-              lineHeight: 1,
-            }}
           >
             ✕
           </button>
@@ -315,15 +255,15 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
         style={{
           maxWidth: 1400,
           margin: "0 auto",
-          paddingTop: 24,
-          paddingBottom: 40,
+          paddingTop: 28,
+          paddingBottom: 48,
         }}
       >
         {/* Per-type BBS */}
         {byType.map(
           (t) =>
             t.rows.length > 0 && (
-              <Card key={t.type} style={{ marginBottom: 20 }}>
+              <Card key={t.type} style={{ marginBottom: 22 }}>
                 <CardHeader
                   icon={TABS.find((x) => x.id === t.type)?.icon}
                   title={`${TABS.find((x) => x.id === t.type)?.label} — BBS`}
@@ -334,13 +274,14 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
                         fontSize: 14,
                         fontWeight: 800,
                         color: "var(--primary-dark)",
+                        fontFamily: "var(--font-mono)",
                       }}
                     >
                       {t.rows.reduce((s, r) => s + r.weight, 0).toFixed(2)} kg
                     </span>
                   }
                 />
-                <div style={{ padding: 18 }}>
+                <div style={{ padding: 20 }}>
                   <GroupedBBSTable rows={t.rows} />
                 </div>
               </Card>
@@ -348,25 +289,25 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
         )}
 
         {/* Combined BBS */}
-        <Card style={{ marginBottom: 20 }}>
+        <Card style={{ marginBottom: 22 }}>
           <CardHeader
             icon="📋"
-            title="COMBINED BBS — All Elements"
+            title="Combined BBS — All Elements"
             subtitle="Aggregate · IS 2502:1963"
           />
-          <div style={{ padding: 18 }}>
+          <div style={{ padding: 20 }}>
             <BBSTable rows={allRows} showSource={true} />
           </div>
         </Card>
 
-        {/* Cost table */}
-        <Card style={{ marginBottom: 20 }}>
+        {/* Cost */}
+        <Card style={{ marginBottom: 22 }}>
           <CardHeader
             icon="💰"
             title="Material Estimate & Cost Summary"
             subtitle="West Bengal Market Rate · Per-piece (12m rod)"
           />
-          <div style={{ padding: 18 }}>
+          <div style={{ padding: 20 }}>
             <CostTable
               costs={costs}
               onRateChange={onRateChange}
@@ -377,39 +318,17 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
         </Card>
 
         {/* Bottom CTA */}
-        <div
-          className="result-cta"
-          style={{
-            background: "white",
-            border: "1px solid var(--border)",
-            borderRadius: 10,
-            padding: "18px 24px",
-          }}
-        >
+        <div className="result-cta cta-block" style={{ marginBottom: 16 }}>
           <div>
-            <div
-              style={{ fontWeight: 700, fontSize: 15, color: "var(--text)" }}
-            >
-              📄 Generate & Share Report
-            </div>
-            <div style={{ fontSize: 12, color: "var(--text3)", marginTop: 2 }}>
+            <div className="cta-block__title">📄 Generate & Share Report</div>
+            <div className="cta-block__sub">
               Download PDF locally or send directly to WhatsApp
             </div>
           </div>
           <ActionBar />
         </div>
 
-        <div
-          style={{
-            marginTop: 14,
-            padding: "10px 16px",
-            background: "#fffbe6",
-            border: "1px solid #ffe082",
-            borderRadius: 8,
-            fontSize: 12,
-            color: "#7d5000",
-          }}
-        >
+        <div className="is-note">
           <b>IS 456:2000 Cover:</b> Footing 75mm · Beam/Col 40mm · Wall Beam
           25mm · Slab 20mm · Staircase 25mm &nbsp;·&nbsp; Lap: 40d · Hook: 9d ·
           Verify before procurement.
@@ -419,7 +338,7 @@ function ResultPage({ result, rates, onRateChange, onBack, details }) {
   );
 }
 
-// ─── MAIN APP ──────────────────────────────────────────────────────────────────
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
 export default function App() {
   const [activeTab, setActiveTab] = useState("footing");
   const [details, setDetails] = useState(DEFAULT_PROJECT);
@@ -559,7 +478,7 @@ export default function App() {
     );
   }
 
-  // ─── CALCULATOR VIEW ─────────────────────────────────────────────────────────
+  // ─── CALCULATOR VIEW ────────────────────────────────────────────────────────
   return (
     <div style={{ minHeight: "100vh" }}>
       <Header
@@ -568,86 +487,40 @@ export default function App() {
         onViewHistory={() => setViewMode("history")}
       />
 
-      {/* page-pad: 32px desktop → 14px mobile */}
       <div
         className="page-pad"
         style={{
           maxWidth: 1400,
           margin: "0 auto",
-          paddingTop: 24,
-          paddingBottom: 40,
+          paddingTop: 28,
+          paddingBottom: 48,
         }}
       >
         <ProjectDetails details={details} setDetails={setDetails} />
 
-        {/* Overview strip — hscroll on mobile */}
-        <div
-          className="hscroll"
-          style={{
-            background: "white",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius)",
-            padding: "12px 18px",
-            marginBottom: 20,
-            display: "flex",
-            alignItems: "center",
-            gap: 14,
-            boxShadow: "var(--shadow-sm)",
-          }}
-        >
-          <span
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: "var(--text)",
-              flexShrink: 0,
-            }}
-          >
-            Elements:
-          </span>
+        {/* Overview strip */}
+        <div className="overview-strip hscroll">
+          <span className="overview-strip__label">Elements:</span>
           {TABS.map((t) => {
             const nos = ITEMS[t.id].reduce((s, it) => s + (+it.count || 1), 0);
             return (
               <div
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  padding: "5px 12px",
-                  borderRadius: 6,
-                  cursor: "pointer",
-                  flexShrink: 0,
-                  background:
-                    activeTab === t.id
-                      ? "var(--primary-light)"
-                      : "var(--surface2)",
-                  border:
-                    activeTab === t.id
-                      ? "1px solid var(--primary)"
-                      : "1px solid transparent",
-                }}
+                className={`element-chip${activeTab === t.id ? " active" : ""}`}
               >
                 <span>{t.icon}</span>
                 <div>
                   <div
+                    className="element-chip__name"
                     style={{
-                      fontSize: 12,
-                      fontWeight: 600,
                       color:
                         activeTab === t.id ? "var(--primary)" : "var(--text)",
                     }}
                   >
                     {t.label}
                   </div>
-                  <div
-                    style={{
-                      fontSize: 10,
-                      color: "var(--text3)",
-                      fontFamily: "var(--font-mono)",
-                    }}
-                  >
+                  <div className="element-chip__meta">
                     {ITEMS[t.id].length} types · {nos} nos
                   </div>
                 </div>
@@ -655,58 +528,40 @@ export default function App() {
             );
           })}
           <div style={{ flex: 1 }} />
-          <span style={{ fontSize: 12, color: "var(--text3)", flexShrink: 0 }}>
+          <span
+            style={{
+              fontSize: 12,
+              color: "var(--text-3)",
+              flexShrink: 0,
+              fontFamily: "var(--font-mono)",
+            }}
+          >
             Total: <b style={{ color: "var(--primary)" }}>{totalNos}</b> nos
           </span>
         </div>
 
-        {/* Tab nav — hscroll on mobile */}
-        <div
-          className="tab-nav hscroll"
-          style={{
-            display: "flex",
-            gap: 0,
-            borderBottom: "2px solid var(--border)",
-            marginBottom: 20,
-          }}
-        >
+        {/* Tab nav */}
+        <div className="tab-nav hscroll">
           {TABS.map((t) => {
             const nos = ITEMS[t.id].reduce((s, it) => s + (+it.count || 1), 0);
+            const isActive = activeTab === t.id;
             return (
               <button
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
+                className={`tab-btn${isActive ? " active" : ""}`}
                 style={{
-                  padding: "11px 22px",
-                  border: "none",
-                  background: "none",
-                  cursor: "pointer",
-                  flexShrink: 0,
-                  borderBottom:
-                    activeTab === t.id
-                      ? `3px solid ${t.color}`
-                      : "3px solid transparent",
-                  fontWeight: activeTab === t.id ? 700 : 500,
-                  color: activeTab === t.id ? t.color : "var(--text2)",
-                  fontSize: 13,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 7,
-                  whiteSpace: "nowrap",
-                  marginBottom: -2,
+                  borderBottomColor: isActive ? t.color : "transparent",
+                  color: isActive ? t.color : "var(--text-2)",
                 }}
               >
                 <span>{t.icon}</span> {t.label}
                 {nos > 0 && (
                   <span
+                    className="tab-count"
                     style={{
-                      background:
-                        activeTab === t.id ? t.color : "var(--surface2)",
-                      color: activeTab === t.id ? "white" : "var(--text2)",
-                      fontSize: 10,
-                      padding: "1px 7px",
-                      borderRadius: 99,
-                      fontWeight: 700,
+                      background: isActive ? t.color : "var(--surface-3)",
+                      color: isActive ? "#fff" : "var(--text-2)",
                     }}
                   >
                     {nos}
@@ -726,7 +581,7 @@ export default function App() {
           />
         </div>
 
-        {/* ── Next / Prev Tab Navigation ── */}
+        {/* Prev / Next Navigation */}
         {(() => {
           const currentIndex = TABS.findIndex((t) => t.id === activeTab);
           const prevTab = TABS[currentIndex - 1];
@@ -737,27 +592,17 @@ export default function App() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                marginTop: 20,
+                marginTop: 22,
                 gap: 12,
               }}
             >
-              {/* Prev */}
               {prevTab ? (
                 <button
                   onClick={() => setActiveTab(prevTab.id)}
+                  className="nav-prev"
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    background: "white",
                     border: `1.5px solid ${prevTab.color}`,
                     color: prevTab.color,
-                    borderRadius: 8,
-                    padding: "10px 20px",
-                    fontSize: 13,
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    boxShadow: "var(--shadow-sm)",
                   }}
                 >
                   ← {prevTab.icon} {prevTab.label}
@@ -766,73 +611,42 @@ export default function App() {
                 <div />
               )}
 
-              {/* Step indicator dots */}
+              {/* Step dots */}
               <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                 {TABS.map((t, i) => (
                   <button
                     key={t.id}
                     onClick={() => setActiveTab(t.id)}
                     title={t.label}
+                    className="step-dot"
                     style={{
                       width: i === currentIndex ? 28 : 8,
-                      height: 8,
-                      borderRadius: 99,
-                      border: "none",
-                      cursor: "pointer",
-                      padding: 0,
                       background:
                         i === currentIndex
                           ? TABS[currentIndex].color
                           : "var(--border)",
-                      transition: "all .2s",
                     }}
                   />
                 ))}
               </div>
 
-              {/* Next */}
               {nextTab ? (
                 <button
                   onClick={() => setActiveTab(nextTab.id)}
+                  className="nav-next"
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    background: nextTab.color,
-                    border: "none",
-                    color: "#fff",
-                    borderRadius: 8,
-                    padding: "10px 20px",
-                    fontSize: 13,
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    boxShadow: `0 2px 10px ${nextTab.color}55`,
+                    background: `linear-gradient(135deg, ${nextTab.color}, ${nextTab.color}cc)`,
                   }}
                 >
                   {nextTab.icon} {nextTab.label} →
                 </button>
               ) : (
-                /* On last tab, show the Calculate button instead */
                 <button
                   onClick={handleCalculate}
                   disabled={!projectReady}
+                  className="btn btn--primary btn--md"
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    background: projectReady
-                      ? "linear-gradient(135deg,#1565c0,#0d47a1)"
-                      : "#b0bec5",
-                    border: "none",
-                    color: "#fff",
-                    borderRadius: 8,
-                    padding: "10px 20px",
-                    fontSize: 13,
-                    fontWeight: 700,
-                    cursor: projectReady ? "pointer" : "not-allowed",
-                    boxShadow: projectReady
-                      ? "0 2px 10px rgba(21,101,192,.4)"
-                      : "none",
+                    animation: projectReady ? "pulse-ring 2s infinite" : "none",
                   }}
                 >
                   ⚡ Calculate BBS →
@@ -842,26 +656,15 @@ export default function App() {
           );
         })()}
 
-        {/* Calculate CTA — calc-cta: row desktop, column mobile */}
-        <div
-          className="calc-cta"
-          style={{
-            marginTop: 28,
-            padding: "20px 24px",
-            background: "linear-gradient(135deg,#e3eefb,#f0f6ff)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius)",
-          }}
-        >
+        {/* Calculate CTA */}
+        <div className="calc-cta cta-block" style={{ marginTop: 28 }}>
           <div>
-            <div
-              style={{ fontWeight: 700, fontSize: 15, color: "var(--primary)" }}
-            >
+            <div className="cta-block__title">
               {projectReady
                 ? `✅ Ready: ${details.projectName}`
                 : "⚠️  Enter Project Name above to enable report"}
             </div>
-            <div style={{ fontSize: 12, color: "var(--text2)", marginTop: 3 }}>
+            <div className="cta-block__sub">
               {totalNos} total nos · IS 456 covers auto-applied · Per-piece
               rates
               {details.engineerPhone &&
@@ -871,89 +674,36 @@ export default function App() {
           <button
             onClick={handleCalculate}
             disabled={!projectReady}
-            style={{
-              background: projectReady
-                ? "linear-gradient(135deg,#1565c0,#0d47a1)"
-                : "#b0bec5",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              padding: "13px 32px",
-              fontSize: 15,
-              fontWeight: 700,
-              cursor: projectReady ? "pointer" : "not-allowed",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              whiteSpace: "nowrap",
-            }}
+            className="btn btn--primary btn--lg"
           >
             ⚡ Calculate & Generate BBS
           </button>
         </div>
 
         {/* WB Rates */}
-        <div
-          style={{
-            marginTop: 16,
-            padding: "14px 18px",
-            background: "white",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius)",
-          }}
-        >
-          <div
-            style={{
-              fontWeight: 600,
-              fontSize: 12,
-              color: "var(--text2)",
-              marginBottom: 10,
-              letterSpacing: 0.5,
-            }}
-          >
-            ₹ WEST BENGAL MARKET RATES (Per 12m Rod) — Edit anytime:
+        <div className="rates-box">
+          <div className="rates-box__title">
+            <span>₹</span> West Bengal Market Rates (Per 12m Rod) — Edit
+            anytime:
           </div>
-          {/* flex-wrap so rates wrap naturally on mobile */}
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
             {Object.keys(rates).map((d) => (
-              <div
-                key={d}
-                style={{ display: "flex", alignItems: "center", gap: 5 }}
-              >
-                <span
-                  style={{
-                    fontSize: 12,
-                    fontFamily: "var(--font-mono)",
-                    color: "var(--red)",
-                    fontWeight: 700,
-                  }}
-                >
-                  φ{d}mm: ₹
-                </span>
+              <div key={d} className="rates-box__item">
+                <span className="rates-box__dia">φ{d}mm: ₹</span>
                 <input
                   type="number"
                   value={rates[d]}
                   onChange={(e) => updateRate(+d, +e.target.value)}
-                  style={{ width: 68, fontSize: 13, padding: "5px 6px" }}
+                  style={{ width: 72, fontSize: 13, padding: "6px 8px" }}
                 />
-                <span style={{ fontSize: 11, color: "var(--text3)" }}>/pc</span>
+                <span className="rates-box__pc">/pc</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <footer
-        style={{
-          borderTop: "1px solid var(--border)",
-          padding: "14px 28px",
-          textAlign: "center",
-          fontSize: 11,
-          color: "var(--text3)",
-          background: "white",
-          marginTop: 20,
-        }}
-      >
+      <footer className="site-footer">
         BBS Calculator · IS 456:2000 · IS 2502:1963 · West Bengal Per-Piece
         Rates · For reference only — verify with structural engineer
       </footer>

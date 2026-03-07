@@ -1,6 +1,7 @@
 // src/utils/pdfReport.js
 // Generates professional BBS PDF report using jsPDF + jspdf-autotable
 // Called from: reportHelpers → download PDF / send to WhatsApp
+// FIX: Added proper table pagination handling to prevent text overlap
 
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -143,7 +144,7 @@ function drawKPISummary(doc, totalWt, totalCost, totalRods, elementCount, pageW,
 }
 
 // ─── BBS TABLE PER ELEMENT TYPE ──────────────────────────────────────────────
-function drawBBSSection(doc, typeLabel, typeIcon, aggregatedRows, startY, pageW) {
+function drawBBSSection(doc, typeLabel, typeIcon, aggregatedRows, startY, pageW, details) {
   if (!aggregatedRows.length) return startY;
   let y = startY;
 
@@ -165,6 +166,14 @@ function drawBBSSection(doc, typeLabel, typeIcon, aggregatedRows, startY, pageW)
   });
 
   for (const [grpLabel, grp] of Object.entries(groups)) {
+    // Check if we need a new page before drawing sub-heading
+    const pageH = doc.internal.pageSize.getHeight();
+    if (y > pageH - 40) {
+      doc.addPage();
+      drawPageHeader(doc, details, pageW, null);
+      y = 22;
+    }
+
     // Sub-heading
     filledRect(doc, 8, y, pageW - 16, 7, [232, 244, 253]);
     setFont(doc, 7, 'bold', BLUE);
@@ -183,7 +192,7 @@ function drawBBSSection(doc, typeLabel, typeIcon, aggregatedRows, startY, pageW)
 
     doc.autoTable({
       startY: y,
-      margin: { left: 8, right: 8 },
+      margin: { left: 8, right: 8, bottom: 18 }, // Added bottom margin for footer
       head: [['Mark', 'Bar Description', 'Nos', 'Cut Len (m)', 'Total Len (m)', 'Unit Wt', 'Weight (kg)']],
       body: bodyRows,
       foot: [[
@@ -205,11 +214,24 @@ function drawBBSSection(doc, typeLabel, typeIcon, aggregatedRows, startY, pageW)
         6: { cellWidth: 22, halign: 'right', fontStyle: 'bold', textColor: RED },
       },
       alternateRowStyles: { fillColor: [247, 250, 253] },
+      showFoot: 'lastPage', // CRITICAL FIX: Only show footer on the last page of multi-page tables
       didParseCell: (data) => {
         if (data.section === 'foot') {
           data.cell.styles.fillColor = [213, 230, 248];
           data.cell.styles.textColor = BLUE;
           data.cell.styles.fontStyle = 'bold';
+        }
+      },
+      didDrawPage: (data) => {
+        // Draw header on continuation pages
+        if (data.pageNumber > 1 || data.pageCount > 1) {
+          const currentPage = doc.internal.getCurrentPageInfo().pageNumber;
+          const startPage = data.settings.startY < 30 ? currentPage : currentPage;
+          
+          // Only draw header if this is a continuation page
+          if (data.pageNumber > 1) {
+            drawPageHeader(doc, details, pageW, null);
+          }
         }
       },
     });
@@ -243,7 +265,7 @@ function drawCombinedSummary(doc, costs, pageW, y) {
 
   doc.autoTable({
     startY: y,
-    margin: { left: 8, right: 8 },
+    margin: { left: 8, right: 8, bottom: 18 },
     head: [['Bar Dia', 'Total Length', 'Weight (kg)', 'Rods (12m)', 'Rate (Rs/kg)', 'Amount (Rs)']],
     body: tableRows,
     foot: [['TOTAL', '—', `${totalKg.toFixed(2)} kg`, `${totalRods} rods`, '—', `Rs.${totalCost.toLocaleString('en-IN')}`]],
@@ -337,7 +359,7 @@ export function generatePDF(details, byType, allRows, costs) {
       y = 22;
     }
 
-    y = drawBBSSection(doc, meta.label, meta.icon, t.rows, y, pageW);
+    y = drawBBSSection(doc, meta.label, meta.icon, t.rows, y, pageW, details);
   });
 
   // ── Cost summary ──────────────────────────────────────────────────────────

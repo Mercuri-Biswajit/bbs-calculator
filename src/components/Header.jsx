@@ -1,7 +1,8 @@
 // src/components/Header.jsx
 // Logo slot + navigation + CTA button
+// UPDATED: Added Reports History button
 
-export default function Header({ onGenerateReport, projectReady }) {
+export default function Header({ onGenerateReport, projectReady, onViewHistory, showHistoryButton = true }) {
   return (
     <header style={{
       background: '#fff',
@@ -67,6 +68,36 @@ export default function Header({ onGenerateReport, projectReady }) {
 
       {/* ── RIGHT: CTA ── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Reports History Button */}
+        {showHistoryButton && onViewHistory && (
+          <button
+            onClick={onViewHistory}
+            style={{
+              background: 'white',
+              color: '#1565c0',
+              border: '1.5px solid #1565c0',
+              borderRadius: 8,
+              padding: '10px 18px',
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: 'pointer',
+              fontFamily: 'var(--font-sans)',
+              letterSpacing: 0.5,
+              display: 'flex', alignItems: 'center', gap: 7,
+              transition: 'all .2s',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = '#f0f6ff';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'white';
+            }}
+          >
+            📚 Saved Reports
+          </button>
+        )}
+
+        {/* Generate Report Button */}
         <button
           onClick={onGenerateReport}
           style={{

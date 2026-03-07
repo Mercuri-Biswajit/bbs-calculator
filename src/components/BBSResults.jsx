@@ -1,6 +1,7 @@
 // src/components/BBSResults.jsx
+// UPDATED: Per-piece rates, WhatsApp bar purchase order
 
-import { BAR_WEIGHT } from '../utils/calculations.js';
+import { BAR_WEIGHT, generateBarPurchaseMessage } from '../utils/calculations.js';
 import { Badge } from './ui.jsx';
 
 // ─── FULL BBS TABLE ───────────────────────────────────────────────────────────
@@ -62,7 +63,6 @@ export function BBSTable({ rows, showSource = true }) {
 
 // ─── GROUPED TABLE ────────────────────────────────────────────────────────────
 export function GroupedBBSTable({ rows }) {
-  // Group by sourceLabel
   const groups = {};
   rows.forEach(r => {
     const key = r.sourceLabel || 'Unnamed';
@@ -84,8 +84,8 @@ export function GroupedBBSTable({ rows }) {
   );
 }
 
-// ─── COST TABLE ───────────────────────────────────────────────────────────────
-export function CostTable({ costs, onRateChange }) {
+// 🆕 ─── COST TABLE (PER-PIECE RATES) ──────────────────────────────────────────
+export function CostTable({ costs, onRateChange, details, onSendBarOrder }) {
   const total = costs.reduce((s, r) => s + r.cost, 0);
   const totalKg = costs.reduce((s, r) => s + r.kg, 0);
 
@@ -124,17 +124,43 @@ export function CostTable({ costs, onRateChange }) {
             </tr>
           </tbody>
         </table>
+
+        {/* 🆕 WhatsApp Bar Purchase Order Button */}
+        {onSendBarOrder && (
+          <button 
+            onClick={onSendBarOrder}
+            style={{ 
+              width: '100%', 
+              marginTop: 12, 
+              background: '#25d366', 
+              color: '#fff', 
+              border: 'none', 
+              borderRadius: 6, 
+              padding: '10px 16px', 
+              fontSize: 13, 
+              fontWeight: 600, 
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              boxShadow: '0 2px 8px rgba(37,211,102,.3)'
+            }}
+          >
+            💬 Send Bar Order via WhatsApp
+          </button>
+        )}
       </div>
 
-      {/* Cost */}
+      {/* 🆕 Cost (PER-PIECE RATES) */}
       <div>
         <div style={{ fontWeight: 700, fontSize: 12, color: 'var(--text)', marginBottom: 10, display:'flex', alignItems:'center', gap:6 }}>
-          <span>💰</span> COST ESTIMATE — WEST BENGAL MARKET RATE
+          <span>💰</span> COST ESTIMATE — PER-PIECE RATE (12m rod)
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, fontFamily: 'var(--font-mono)' }}>
           <thead>
             <tr style={{ background: '#f0f4f8' }}>
-              {['Dia', 'Weight', 'Rate (₹/kg)', 'Amount (₹)'].map(h => (
+              {['Dia', '12m Rods', 'Rate (₹/pc)', 'Amount (₹)'].map(h => (
                 <th key={h} style={{ ...th, fontSize: 11 }}>{h}</th>
               ))}
             </tr>
@@ -143,12 +169,17 @@ export function CostTable({ costs, onRateChange }) {
             {costs.map((r, i) => (
               <tr key={r.dia} style={{ background: i%2===0?'white':'var(--row-odd)' }}>
                 <td style={{ ...td, color: 'var(--red)', fontWeight: 700 }}>φ{r.dia}mm</td>
-                <td style={{ ...td, textAlign: 'right' }}>{r.kg} kg</td>
+                <td style={{ ...td, textAlign: 'center', fontWeight: 600 }}>{r.rods12m} pcs</td>
                 <td style={{ ...td, textAlign: 'center', padding:'4px 8px' }}>
                   {onRateChange ? (
-                    <input type="number" value={r.rate} onChange={e => onRateChange(r.dia, +e.target.value)} style={{ width:64, textAlign:'center', fontSize:12 }} />
+                    <input 
+                      type="number" 
+                      value={r.ratePerPiece} 
+                      onChange={e => onRateChange(r.dia, +e.target.value)} 
+                      style={{ width:74, textAlign:'center', fontSize:12 }} 
+                    />
                   ) : (
-                    <span>₹{r.rate}</span>
+                    <span>₹{r.ratePerPiece}</span>
                   )}
                 </td>
                 <td style={{ ...td, textAlign: 'right', color: 'var(--green)', fontWeight: 600 }}>₹{r.cost.toLocaleString('en-IN')}</td>
@@ -165,7 +196,7 @@ export function CostTable({ costs, onRateChange }) {
           </tfoot>
         </table>
         <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text3)', fontStyle: 'italic' }}>
-          * Add 5% cutting wastage for actual procurement. Rates are editable above.
+          * Rates shown per 12m rod. Add 5% wastage for actual procurement.
         </div>
       </div>
     </div>

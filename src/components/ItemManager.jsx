@@ -1,30 +1,50 @@
 // src/components/ItemManager.jsx
-// Handles adding multiple instances of any element type
+// UPDATED: Added staircase, slab type (1-way/2-way), unit selector
 
 import { useState } from 'react';
 import { Card, CardHeader, Field, DiaSelect, Button, Badge, Divider } from './ui.jsx';
-import { DrawingFooting, DrawingColumn, DrawingBeam, DrawingSlab } from '../utils/drawings.jsx';
+import { DrawingFooting, DrawingColumn, DrawingBeam, DrawingSlab, DrawingStaircase } from '../utils/drawings.jsx';
+import { UNITS } from '../utils/calculations.js';
 
 // ─── DEFAULT PARAMS PER TYPE ──────────────────────────────────────────────────
 export const DEFAULTS = {
-  footing:    { label:'Footing F1',    L:'1.5', B:'1.5', D:'0.45', mainDia:'12', distDia:'12', spacing:'150' },
-  column:     { label:'Column C1',     H:'3',   B:'0.3', D:'0.3',  mainDia:'16', mainNos:'4',  tieDia:'8', tieSpacing:'150' },
-  plinthBeam: { label:'Plinth Beam PB1',L:'4',  B:'0.23',D:'0.45', botDia:'16', botNos:'3', topDia:'12', topNos:'2', exTopDia:'12', exTopNos:'1', stirDia:'8', stirSpacing:'150' },
-  wallBeam:   { label:'Wall Beam WB1', L:'4',   B:'0.23',D:'0.35', botDia:'12', botNos:'3', topDia:'10', topNos:'2', exTopDia:'10', exTopNos:'0', stirDia:'8', stirSpacing:'200' },
-  slab:       { label:'Slab S1',       L:'4',   B:'3',   D:'0.125',mainDia:'10', distDia:'8', mainSp:'150', distSp:'200', topDia:'8', topSp:'150' },
+  footing:    { label:'Footing F1',    L:'1.5', B:'1.5', D:'0.45', mainDia:'12', distDia:'12', spacing:'150', unit:'m' },
+  column:     { label:'Column C1',     H:'3',   B:'0.3', D:'0.3',  mainDia:'16', mainNos:'4',  tieDia:'8', tieSpacing:'150', unit:'m' },
+  plinthBeam: { label:'Plinth Beam PB1',L:'4',  B:'0.23',D:'0.45', botDia:'16', botNos:'3', topDia:'12', topNos:'2', exTopDia:'12', exTopNos:'1', stirDia:'8', stirSpacing:'150', unit:'m' },
+  wallBeam:   { label:'Wall Beam WB1', L:'4',   B:'0.23',D:'0.35', botDia:'12', botNos:'3', topDia:'10', topNos:'2', exTopDia:'10', exTopNos:'0', stirDia:'8', stirSpacing:'200', unit:'m' },
+  slab:       { label:'Slab S1',       L:'4',   B:'3',   D:'0.125',mainDia:'10', distDia:'8', mainSp:'150', distSp:'200', topDia:'8', topSp:'150', slabType:'2-way', unit:'m' },
+  staircase:  { label:'Staircase ST1', flightLen:'3.5', width:'1.2', waistThick:'0.15', mainDia:'10', mainSp:'150', distDia:'8', distSp:'200', unit:'m' },
 };
 
 let _id = 0;
 export const newItem = (type) => ({ id: ++_id, count: 1, ...DEFAULTS[type] });
+
+// 🆕 Unit Selector Component
+function UnitSelect({ value, onChange }) {
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <label style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 600, display: 'block', marginBottom: 4, letterSpacing: .4 }}>
+        Unit
+      </label>
+      <select value={value} onChange={e => onChange(e.target.value)} style={{ padding: '7px 10px' }}>
+        {UNITS.map(u => (
+          <option key={u} value={u}>{u === 'm' ? 'Meters (m)' : u === 'mm' ? 'Millimeters (mm)' : u === 'ft' ? 'Feet (ft)' : 'Inches (in)'}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
 
 // ─── FOOTING FORM ─────────────────────────────────────────────────────────────
 function FootingForm({ item, onChange }) {
   const u = (k) => (v) => onChange(k, v);
   return (
     <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 14px' }}>
-      <Field label="Length L" value={item.L} onChange={u('L')} unit="m" />
-      <Field label="Width B"  value={item.B} onChange={u('B')} unit="m" />
-      <Field label="Depth D"  value={item.D} onChange={u('D')} unit="m" />
+      <UnitSelect value={item.unit || 'm'} onChange={u('unit')} />
+      <div />
+      <Field label="Length L" value={item.L} onChange={u('L')} unit={item.unit} />
+      <Field label="Width B"  value={item.B} onChange={u('B')} unit={item.unit} />
+      <Field label="Depth D"  value={item.D} onChange={u('D')} unit={item.unit} />
       <Field label="Bar Spacing" value={item.spacing} onChange={u('spacing')} unit="mm" step="10" />
       <DiaSelect label="Main Bar Dia" value={item.mainDia} onChange={u('mainDia')} />
       <DiaSelect label="Dist Bar Dia" value={item.distDia} onChange={u('distDia')} />
@@ -37,9 +57,11 @@ function ColumnForm({ item, onChange }) {
   const u = (k) => (v) => onChange(k, v);
   return (
     <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 14px' }}>
-      <Field label="Storey Height H" value={item.H} onChange={u('H')} unit="m" />
-      <Field label="Width B" value={item.B} onChange={u('B')} unit="m" />
-      <Field label="Depth D" value={item.D} onChange={u('D')} unit="m" />
+      <UnitSelect value={item.unit || 'm'} onChange={u('unit')} />
+      <div />
+      <Field label="Storey Height H" value={item.H} onChange={u('H')} unit={item.unit} />
+      <Field label="Width B" value={item.B} onChange={u('B')} unit={item.unit} />
+      <Field label="Depth D" value={item.D} onChange={u('D')} unit={item.unit} />
       <Field label="No. of Main Bars" value={item.mainNos} onChange={u('mainNos')} unit="nos" step="1" />
       <DiaSelect label="Main Bar Dia" value={item.mainDia} onChange={u('mainDia')} />
       <DiaSelect label="Lateral Tie Dia" value={item.tieDia} onChange={u('tieDia')} />
@@ -53,9 +75,11 @@ function BeamForm({ item, onChange }) {
   const u = (k) => (v) => onChange(k, v);
   return (
     <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 14px' }}>
-      <Field label="Span L" value={item.L} onChange={u('L')} unit="m" />
-      <Field label="Width B" value={item.B} onChange={u('B')} unit="m" />
-      <Field label="Depth D" value={item.D} onChange={u('D')} unit="m" />
+      <UnitSelect value={item.unit || 'm'} onChange={u('unit')} />
+      <div />
+      <Field label="Span L" value={item.L} onChange={u('L')} unit={item.unit} />
+      <Field label="Width B" value={item.B} onChange={u('B')} unit={item.unit} />
+      <Field label="Depth D" value={item.D} onChange={u('D')} unit={item.unit} />
       <Field label="No. Bottom Bars" value={item.botNos} onChange={u('botNos')} unit="nos" step="1" />
       <DiaSelect label="Bottom Bar Dia" value={item.botDia} onChange={u('botDia')} />
       <Field label="No. Top Bars" value={item.topNos} onChange={u('topNos')} unit="nos" step="1" />
@@ -68,14 +92,24 @@ function BeamForm({ item, onChange }) {
   );
 }
 
-// ─── SLAB FORM ────────────────────────────────────────────────────────────────
+// 🆕 ─── SLAB FORM (with 1-way/2-way selection) ────────────────────────────────
 function SlabForm({ item, onChange }) {
   const u = (k) => (v) => onChange(k, v);
   return (
     <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 14px' }}>
-      <Field label="Span Lx" value={item.L} onChange={u('L')} unit="m" />
-      <Field label="Span Ly" value={item.B} onChange={u('B')} unit="m" />
-      <Field label="Thickness D" value={item.D} onChange={u('D')} unit="m" />
+      <UnitSelect value={item.unit || 'm'} onChange={u('unit')} />
+      <div style={{ marginBottom: 10 }}>
+        <label style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 600, display: 'block', marginBottom: 4, letterSpacing: .4 }}>
+          Slab Type
+        </label>
+        <select value={item.slabType || '2-way'} onChange={e => u('slabType')(e.target.value)} style={{ padding: '7px 10px' }}>
+          <option value="1-way">1-Way Slab (Ly/Lx {'>'} 2)</option>
+          <option value="2-way">2-Way Slab (Ly/Lx {'<'} 2)</option>
+        </select>
+      </div>
+      <Field label="Span Lx" value={item.L} onChange={u('L')} unit={item.unit} />
+      <Field label="Span Ly" value={item.B} onChange={u('B')} unit={item.unit} />
+      <Field label="Thickness D" value={item.D} onChange={u('D')} unit={item.unit} />
       <DiaSelect label="Main Bar Dia" value={item.mainDia} onChange={u('mainDia')} />
       <Field label="Main Bar Spacing" value={item.mainSp} onChange={u('mainSp')} unit="mm" step="10" />
       <DiaSelect label="Dist Bar Dia" value={item.distDia} onChange={u('distDia')} />
@@ -86,8 +120,33 @@ function SlabForm({ item, onChange }) {
   );
 }
 
+// 🆕 ─── STAIRCASE FORM ────────────────────────────────────────────────────────
+function StaircaseForm({ item, onChange }) {
+  const u = (k) => (v) => onChange(k, v);
+  return (
+    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 14px' }}>
+      <UnitSelect value={item.unit || 'm'} onChange={u('unit')} />
+      <div />
+      <Field label="Flight Length" value={item.flightLen} onChange={u('flightLen')} unit={item.unit} />
+      <Field label="Width" value={item.width} onChange={u('width')} unit={item.unit} />
+      <Field label="Waist Thickness" value={item.waistThick} onChange={u('waistThick')} unit={item.unit} />
+      <DiaSelect label="Main Bar Dia" value={item.mainDia} onChange={u('mainDia')} />
+      <Field label="Main Bar Spacing" value={item.mainSp} onChange={u('mainSp')} unit="mm" step="10" />
+      <DiaSelect label="Distribution Bar Dia" value={item.distDia} onChange={u('distDia')} />
+      <Field label="Dist Bar Spacing" value={item.distSp} onChange={u('distSp')} unit="mm" step="10" />
+    </div>
+  );
+}
+
 function getForm(type) {
-  return { footing: FootingForm, column: ColumnForm, plinthBeam: BeamForm, wallBeam: BeamForm, slab: SlabForm }[type];
+  return { 
+    footing: FootingForm, 
+    column: ColumnForm, 
+    plinthBeam: BeamForm, 
+    wallBeam: BeamForm, 
+    slab: SlabForm,
+    staircase: StaircaseForm
+  }[type];
 }
 
 function getDrawing(type, item) {
@@ -96,10 +155,11 @@ function getDrawing(type, item) {
   if (type === 'plinthBeam') return <DrawingBeam {...item} coverType="plinthBeam" />;
   if (type === 'wallBeam')   return <DrawingBeam {...item} coverType="wallBeam" />;
   if (type === 'slab')       return <DrawingSlab {...item} />;
+  if (type === 'staircase')  return <DrawingStaircase {...item} />;
 }
 
-const TYPE_COLORS = { footing:'orange', column:'blue', plinthBeam:'green', wallBeam:'purple', slab:'red' };
-const TYPE_ICONS  = { footing:'🏗', column:'🏛', plinthBeam:'🔩', wallBeam:'⚙️', slab:'▦' };
+const TYPE_COLORS = { footing:'orange', column:'blue', plinthBeam:'green', wallBeam:'purple', slab:'red', staircase:'teal' };
+const TYPE_ICONS  = { footing:'🏗', column:'🏛', plinthBeam:'🔩', wallBeam:'⚙️', slab:'▦', staircase:'🪜' };
 
 // ─── SINGLE ITEM CARD ─────────────────────────────────────────────────────────
 function ItemCard({ item, type, onChange, onRemove, index }) {
@@ -157,9 +217,17 @@ function ItemCard({ item, type, onChange, onRemove, index }) {
 export function ItemManager({ type, items, setItems }) {
   const addItem = () => {
     const n = items.length + 1;
-    const prefixes = { footing:'F', column:'C', plinthBeam:'PB', wallBeam:'WB', slab:'S' };
+    const prefixes = { footing:'F', column:'C', plinthBeam:'PB', wallBeam:'WB', slab:'S', staircase:'ST' };
     const item = newItem(type);
-    item.label = `${type.includes('Beam') ? type.replace(/([A-Z])/g,' $1').trim() : type.charAt(0).toUpperCase()+type.slice(1)} ${prefixes[type]}${n}`;
+    const typeNames = { 
+      footing: 'Footing', 
+      column: 'Column', 
+      plinthBeam: 'Plinth Beam', 
+      wallBeam: 'Wall Beam', 
+      slab: 'Slab',
+      staircase: 'Staircase'
+    };
+    item.label = `${typeNames[type]} ${prefixes[type]}${n}`;
     setItems(prev => [...prev, item]);
   };
 
@@ -173,6 +241,15 @@ export function ItemManager({ type, items, setItems }) {
 
   const totalCount = items.reduce((s, it) => s + (+it.count || 1), 0);
 
+  const typeLabels = {
+    footing: 'Footings',
+    column: 'Columns',
+    plinthBeam: 'Plinth Beams',
+    wallBeam: 'Wall Beams',
+    slab: 'Slabs',
+    staircase: 'Staircases'
+  };
+
   return (
     <div>
       {/* Header */}
@@ -181,7 +258,7 @@ export function ItemManager({ type, items, setItems }) {
           <span style={{ fontSize:20 }}>{TYPE_ICONS[type]}</span>
           <div>
             <div style={{ fontWeight:700, fontSize:14, color:'var(--text)' }}>
-              {type === 'plinthBeam' ? 'Plinth Beams' : type === 'wallBeam' ? 'Wall Beams' : type.charAt(0).toUpperCase()+type.slice(1)+'s'}
+              {typeLabels[type]}
             </div>
             <div style={{ fontSize:11, color:'var(--text3)', fontFamily:'var(--font-mono)' }}>
               {items.length} types · {totalCount} total nos
@@ -196,8 +273,8 @@ export function ItemManager({ type, items, setItems }) {
       {items.length === 0 && (
         <div style={{ textAlign:'center', padding:'32px 20px', color:'var(--text3)', border:'2px dashed var(--border)', borderRadius:'var(--radius)', background:'var(--surface2)' }}>
           <div style={{ fontSize:32, marginBottom:8 }}>{TYPE_ICONS[type]}</div>
-          <div style={{ fontWeight:600, marginBottom:4 }}>No {type}s added yet</div>
-          <div style={{ fontSize:12 }}>Click "+ Add" to start adding {type}s to the project</div>
+          <div style={{ fontWeight:600, marginBottom:4 }}>No {typeLabels[type]} added yet</div>
+          <div style={{ fontSize:12 }}>Click "+ Add" to start adding {typeLabels[type]} to the project</div>
         </div>
       )}
 

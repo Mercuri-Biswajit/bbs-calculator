@@ -1,74 +1,74 @@
-/* ─── DESIGN TOKENS ─────────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap');
+/* ─── DESIGN TOKENS — URBAN MATRIX PROFESSIONAL THEME ──────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;700&display=swap');
 
 :root {
   /* Fonts */
-  --font-sans: 'DM Sans', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
-  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Outfit', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  --font-display: 'Outfit', sans-serif;
 
-  /* Core Palette */
-  --navy-950: #060d1f;
-  --navy-900: #0a1628;
-  --navy-800: #0f2040;
-  --navy-700: #162d57;
-  --navy-600: #1e3d70;
-  --blue-500: #1e5cb8;
-  --blue-400: #2e74d4;
-  --blue-300: #5a9ae8;
+  /* Core Palette — Refined Navy/Slate Engineering */
+  --navy-950: #09182e;
+  --navy-900: #060f1e;
+  --navy-800: #0b1a30;
+  --navy-700: #112240;
+  --navy-600: #1a3358;
+  --blue-500: #2563eb;
+  --blue-400: #3b82f6;
+  --blue-300: #60a5fa;
   --blue-100: #dbeafe;
-  --blue-50:  #eff6ff;
+  --blue-50: #eff6ff;
 
-  /* Accent */
-  --accent-gold:   #f59e0b;
-  --accent-amber:  #fbbf24;
-  --accent-teal:   #0d9488;
+  /* Accent — Amber gold for engineering precision */
+  --accent-gold: #f59e0b;
+  --accent-amber: #d97706;
+  --accent-teal: #0f766e;
   --accent-teal-light: #ccfbf1;
 
   /* Semantic */
-  --bg:          #f0f4f9;
-  --bg-alt:      #e8eef6;
-  --surface:     #ffffff;
-  --surface-2:   #f7f9fc;
-  --surface-3:   #edf2f8;
-  --border:      #d1dce8;
-  --border-2:    #e4ecf4;
+  --bg: #f1f5f9;
+  --bg-alt: #e8edf5;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #f0f4f8;
+  --border: #cbd5e1;
+  --border-2: #e2e8f0;
 
-  --text:   #0f1f35;
-  --text-2: #3d5166;
-  --text-3: #7b93aa;
-  --text-4: #a8bece;
+  --text: #0f172a;
+  --text-2: #334155;
+  --text-3: #64748b;
+  --text-4: #94a3b8;
 
-  --primary:       var(--blue-500);
+  --primary: var(--blue-500);
   --primary-hover: var(--blue-400);
-  --primary-dark:  var(--navy-700);
-  --primary-light: var(--blue-50);
+  --primary-dark: var(--navy-700);
+  --primary-light: #eff6ff;
 
-  --red:    #dc2626;
+  --red: #dc2626;
   --red-bg: #fef2f2;
-  --green:  #059669;
+  --green: #059669;
   --green-bg: #ecfdf5;
   --orange: #d97706;
 
   /* Row stripes */
   --row-even: #ffffff;
-  --row-odd:  #f5f8fc;
+  --row-odd: #f8fafc;
 
   /* Shadows */
-  --shadow-xs: 0 1px 2px rgba(15,31,53,.06);
-  --shadow-sm: 0 1px 4px rgba(15,31,53,.08), 0 1px 2px rgba(15,31,53,.04);
-  --shadow:    0 4px 12px rgba(15,31,53,.10), 0 2px 4px rgba(15,31,53,.06);
-  --shadow-md: 0 8px 24px rgba(15,31,53,.12), 0 4px 8px rgba(15,31,53,.08);
-  --shadow-lg: 0 20px 48px rgba(15,31,53,.15), 0 8px 16px rgba(15,31,53,.10);
-  --shadow-blue: 0 4px 18px rgba(30,92,184,.25), 0 2px 6px rgba(30,92,184,.15);
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, .04);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, .07), 0 1px 2px rgba(15, 23, 42, .04);
+  --shadow: 0 4px 12px rgba(15, 23, 42, .09), 0 2px 4px rgba(15, 23, 42, .05);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, .11), 0 4px 8px rgba(15, 23, 42, .07);
+  --shadow-lg: 0 20px 48px rgba(15, 23, 42, .14), 0 8px 16px rgba(15, 23, 42, .09);
+  --shadow-blue: 0 4px 18px rgba(37, 99, 235, .22), 0 2px 6px rgba(37, 99, 235, .12);
 
   /* Radii */
-  --radius-sm: 6px;
-  --radius:    10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
 
   /* Transitions */
-  --transition: 150ms cubic-bezier(.4,0,.2,1);
-  --transition-slow: 300ms cubic-bezier(.4,0,.2,1);
+  --transition: 150ms cubic-bezier(.4, 0, .2, 1);
+  --transition-slow: 300ms cubic-bezier(.4, 0, .2, 1);
 }

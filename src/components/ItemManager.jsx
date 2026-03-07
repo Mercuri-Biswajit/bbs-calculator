@@ -226,7 +226,7 @@ function SlabForm({ item, onChange }) {
   const u = (k) => (v) => onChange(k, v);
   return (
     <div className="form-grid">
-      <div style={{ marginBottom: 12 }}>
+      <div className="field">
         <label className="field__label">Slab Type</label>
         <select
           value={item.slabType || "2-way"}
@@ -350,13 +350,12 @@ const TYPE_ICONS = {
 
 // ─── ITEM CARD ────────────────────────────────────────────────────────────────
 function ItemCard({ item, type, onChange, onRemove, index }) {
-  const [showDrawing, setShowDrawing] = useState(false);
+  const [showDrawing, setShowDrawing] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
   const Form = getForm(type);
 
   return (
     <Card className="item-card fade-in">
-      {/* Header */}
       <div className="item-card__header item-hdr">
         <Badge label={`#${index + 1}`} color={TYPE_COLORS[type]} />
         <input
@@ -374,41 +373,48 @@ function ItemCard({ item, type, onChange, onRemove, index }) {
             onChange={(e) => onChange("count", Math.max(1, +e.target.value))}
             className="item-card__qty-input"
           />
-          <span style={{ fontSize: 11, color: "var(--text-3)" }}>nos</span>
+          <span className="item-card__qty-unit">nos</span>
         </div>
-        <Button
-          size="sm"
-          variant="ghost"
+        <button
           onClick={() => setShowDrawing((v) => !v)}
+          className={`btn btn--sm item-card__draw-btn${showDrawing ? " item-card__draw-btn--active" : ""}`}
         >
-          {showDrawing ? "🗺 Hide" : "📐 Drawing"}
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
+          📐 {showDrawing ? "Hide Drawing" : "Drawing"}
+        </button>
+        <button
           onClick={() => setCollapsed((v) => !v)}
+          className="btn btn--sm item-card__hdr-btn"
         >
           {collapsed ? "▼ Expand" : "▲ Collapse"}
-        </Button>
+        </button>
         <Button size="sm" variant="danger" onClick={onRemove}>
           ✕ Remove
         </Button>
       </div>
 
-      {showDrawing && !collapsed && (
-        <div className="drawing-panel">{getDrawing(type, item)}</div>
-      )}
-
       {!collapsed && (
-        <div style={{ padding: "16px 20px" }}>
-          <div className="item-card__unit-reminder">
-            <span>📐</span>
-            <span>
-              <b>Dimensions → metres (m)</b> &nbsp;·&nbsp;{" "}
-              <b>Spacings → millimetres (mm)</b>
-            </span>
+        <div
+          className={`item-card__body${showDrawing ? " item-card__body--split" : ""}`}
+        >
+          <div className="item-card__form-panel">
+            <div className="item-card__unit-reminder">
+              <span>📐</span>
+              <span>
+                <b>Dimensions → metres (m)</b> &nbsp;·&nbsp;{" "}
+                <b>Spacings → millimetres (mm)</b>
+              </span>
+            </div>
+            <Form item={item} onChange={onChange} />
           </div>
-          <Form item={item} onChange={onChange} />
+
+          {showDrawing && (
+            <div className="item-card__drawing-panel">
+              <div className="item-card__drawing-label">
+                📐 Live Blueprint Preview
+              </div>
+              {getDrawing(type, item)}
+            </div>
+          )}
         </div>
       )}
     </Card>
@@ -459,31 +465,12 @@ export function ItemManager({ type, items, setItems }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 16,
-          flexWrap: "wrap",
-          gap: 10,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 22 }}>{TYPE_ICONS[type]}</span>
+      <div className="item-manager__toolbar">
+        <div className="item-manager__info">
+          <span className="item-manager__icon">{TYPE_ICONS[type]}</span>
           <div>
-            <div
-              style={{ fontWeight: 700, fontSize: 15, color: "var(--text)" }}
-            >
-              {typeLabels[type]}
-            </div>
-            <div
-              style={{
-                fontSize: 11,
-                color: "var(--text-3)",
-                fontFamily: "var(--font-mono)",
-              }}
-            >
+            <div className="item-manager__title">{typeLabels[type]}</div>
+            <div className="item-manager__meta">
               {items.length} types · {totalCount} total nos
             </div>
           </div>

@@ -11,9 +11,7 @@ export default function Header({
   return (
     <header className="header site-header">
       {/* ── LEFT: Logo ── */}
-        <div className="header__logo-icon">
-          <img src={logo} alt="Logo" className="header__logo-img" />
-        </div>
+      <img src={logo} alt="Logo" className="header__logo-img" />
 
       {/* ── CENTER: Nav (hidden on mobile) ── */}
       <nav className="hdr-nav" style={{ alignItems: "center", gap: 4 }}>

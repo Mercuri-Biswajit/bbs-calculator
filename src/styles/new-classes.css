@@ -1,0 +1,482 @@
+/* ─── NEW ELEMENT ADDITIONS ──────────────────────────────────────────────────── */
+
+/* ── Stirrup zone info banner (in BeamForm) ── */
+.stirrup-zone-info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #1d4ed8;
+  font-family: var(--font-mono);
+}
+
+/* ── Optional feature toggle panels (Torsion, Chajja, Crank) ── */
+.feature-panel {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+}
+
+.feature-panel--torsion {
+  background: #fdf4ff;
+  border: 1px solid #e9d5ff;
+}
+
+.feature-panel--chajja {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
+.feature-panel--crank {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.feature-panel__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  background: none;
+  border: none;
+  padding: 0;
+  width: 100%;
+  text-align: left;
+}
+
+.feature-panel--torsion .feature-panel__toggle { color: #7c3aed; }
+.feature-panel--chajja  .feature-panel__toggle { color: #92400e; }
+.feature-panel--crank   .feature-panel__toggle { color: #065f46; }
+
+.feature-panel__body {
+  margin-top: 10px;
+}
+
+/* ── Raft info note ── */
+.raft-info-note {
+  margin-top: 10px;
+  font-size: 11px;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  font-family: var(--font-mono);
+}
+
+/* ── Result view switcher ── */
+.view-switcher {
+  display: flex;
+  gap: 0;
+  margin-bottom: 22px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-2);
+  overflow: hidden;
+  flex-wrap: wrap;
+}
+
+.view-switcher__btn {
+  flex: 1;
+  min-width: 140px;
+  padding: 11px 16px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--text-2);
+  font-family: var(--font-display);
+  transition: all var(--transition);
+}
+
+.view-switcher__btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.view-switcher__btn.active {
+  background: var(--navy-800);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ── Excel button ── */
+.btn--excel {
+  background: #1d6f42;
+  color: #fff;
+  border: none;
+}
+
+.btn--excel:hover {
+  background: #155c36;
+  box-shadow: 0 4px 14px rgba(29, 111, 66, .3);
+}
+
+.btn--excel:disabled {
+  background: #94a3b8 !important;
+}
+
+/* ── Cutting length section header ── */
+.cut-section-hdr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  background: var(--navy-800);
+  border-radius: var(--radius) var(--radius) 0 0;
+  color: #fff;
+  margin-bottom: 0;
+}
+
+.cut-section-hdr__dia {
+  font-weight: 800;
+  font-size: 15px;
+  font-family: var(--font-mono);
+  color: #f87171;
+}
+
+.cut-section-hdr__unit {
+  font-size: 11px;
+  color: rgba(255,255,255,.5);
+  font-family: var(--font-mono);
+}
+
+.cut-section-hdr__spacer { flex: 1; }
+
+.cut-section-hdr__len {
+  font-size: 12px;
+  font-weight: 700;
+  color: #4ade80;
+}
+
+.cut-section-hdr__wt {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.cut-section-hdr__rods {
+  font-size: 11px;
+  background: rgba(255,255,255,.15);
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+}
+
+.cut-section-wrap {
+  margin-bottom: 24px;
+}
+
+/* ── Cutting/tag table cell helpers ── */
+.td-source   { font-size: 11px; color: var(--text-2); }
+.td-mark     { text-align: center; font-weight: 700; color: var(--primary); font-family: var(--font-mono); }
+.td-dia      { text-align: center; color: var(--red); font-weight: 700; font-family: var(--font-mono); }
+.td-mono     { font-family: var(--font-mono); }
+.td-right    { text-align: right; font-family: var(--font-mono); }
+.td-len      { text-align: right; font-family: var(--font-mono); color: var(--green); font-weight: 600; }
+.td-wt       { text-align: right; font-family: var(--font-mono); color: var(--red); font-weight: 700; }
+.td-center   { text-align: center; }
+
+/* ── Grand total bar ── */
+.grand-total-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 14px 20px;
+  background: var(--navy-800);
+  border-radius: var(--radius);
+  margin-top: 8px;
+  align-items: center;
+}
+
+.grand-total-bar__label {
+  font-weight: 700;
+  font-size: 13px;
+  color: rgba(255,255,255,.7);
+}
+
+.grand-total-bar__len {
+  font-weight: 800;
+  font-size: 16px;
+  color: #4ade80;
+  font-family: var(--font-mono);
+}
+
+.grand-total-bar__wt {
+  font-weight: 800;
+  font-size: 16px;
+  color: #fbbf24;
+  font-family: var(--font-mono);
+}
+
+/* ── Bar tag pill ── */
+.bar-tag-pill {
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+/* ── Lap splice diagram box ── */
+.lapsplice-diagram {
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.lapsplice-diagram__title {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+}
+
+/* ── Zone badges in lap splice table ── */
+.zone-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.zone-badge--tension {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.zone-badge--compression {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+/* ── Table footnotes ── */
+.tbl-note {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-3);
+  font-style: italic;
+  font-family: var(--font-mono);
+}
+
+/* ── Compact Project Details form ── */
+.proj-compact-header {
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--border-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-2);
+}
+
+.proj-compact-header__left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.proj-compact-header__icon { font-size: 14px; }
+
+.proj-compact-header__title {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+  font-family: var(--font-display);
+}
+
+.proj-compact-header__name {
+  font-size: 11px;
+  color: var(--primary);
+  font-family: var(--font-mono);
+  margin-left: 4px;
+}
+
+.proj-compact-body {
+  padding: 14px 18px;
+}
+
+.proj-row-fields {
+  margin-bottom: 12px;
+}
+
+.proj-row-fields--row1 {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.5fr 1.5fr 1fr;
+  gap: 0 14px;
+}
+
+.proj-row-fields--row2 {
+  display: grid;
+  grid-template-columns: 1.5fr 1.2fr 1.8fr 1.2fr 1.2fr;
+  gap: 0 14px;
+}
+
+@media (max-width: 900px) {
+  .proj-row-fields--row1,
+  .proj-row-fields--row2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .proj-row-fields--row1,
+  .proj-row-fields--row2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.proj-compact-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 0;
+}
+
+.proj-compact-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-family: var(--font-mono);
+}
+
+.proj-compact-label--wa {
+  color: #059669;
+}
+
+.proj-wa-wrap { position: relative; }
+
+.proj-wa-prefix {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  pointer-events: none;
+}
+
+.proj-wa-input {
+  padding-left: 36px !important;
+  border: 1.5px solid #25d366 !important;
+  background: #f0fff4 !important;
+}
+
+.proj-remarks-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-family: var(--font-mono);
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* ── Badge color: brown (for lintel) ── */
+.badge--brown {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+/* ── Badge color: indigo (for raft) ── */
+.badge--indigo {
+  background: #eef2ff;
+  color: #4338ca;
+  border: 1px solid #c7d2fe;
+}
+
+/* ── Result page layout ── */
+.result-page { min-height: 100vh; background: var(--bg); }
+
+.result-page__body {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-top: 28px;
+  padding-bottom: 48px;
+}
+
+.result-banner__inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.result-banner__toprow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.result-banner__project  { color: rgba(255,255,255,.9);  font-size: 14px; font-weight: 700; font-family: var(--font-display); }
+.result-banner__client   { color: rgba(255,255,255,.55); font-size: 12px; font-family: var(--font-mono); }
+.result-banner__location { color: rgba(255,255,255,.45); font-size: 12px; font-family: var(--font-mono); }
+.result-banner__spacer   { flex: 1; }
+
+/* ── Glass button variant (used in dark banner) ── */
+.btn--glass {
+  color: #fff !important;
+  background: rgba(255,255,255,.15) !important;
+  border: 1px solid rgba(255,255,255,.3) !important;
+  backdrop-filter: blur(6px);
+}
+.btn--glass:hover { background: rgba(255,255,255,.25) !important; }
+
+.btn--glass-dark {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.25);
+  color: #fff;
+}
+.btn--glass-dark:hover { background: rgba(255,255,255,.2); }
+
+/* ── Section total weight (card header right side) ── */
+.section-total-wt {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--primary-dark);
+  font-family: var(--font-mono);
+}
+
+/* ── Generic card body padding ── */
+.card-body-pad { padding: 20px; }
+
+/* ── Result section cards spacing ── */
+.result-section-card { margin-bottom: 22px; }
+
+/* ── th-left: left-align header cell ── */
+.th-left { text-align: left !important; }
+
+/* ── td-orange for lap mm values ── */
+.td-orange { color: var(--orange); font-weight: 700; }
+
+/* ── td-empty for empty state in table ── */
+.td-empty { text-align: center; padding: 24px; color: var(--text-3); }
+
+/* ── Lap splice SVG responsive ── */
+.lapsplice-svg { width: 100%; max-width: 600px; display: block; }
+
+/* ── Result banner padding override ── */
+.result-banner { padding-top: 24px; padding-bottom: 24px; }

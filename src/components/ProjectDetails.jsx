@@ -1,28 +1,36 @@
 // src/components/ProjectDetails.jsx
 
 import { useState } from "react";
-import { Card, CardHeader } from "./ui.jsx";
+import { Card } from "./ui.jsx";
 
 const today = () => new Date().toISOString().split("T")[0];
 
 export const DEFAULT_PROJECT = {
-  projectName:   "",
-  clientName:    "",
+  projectName: "",
+  clientName: "",
   clientAddress: "",
-  location:      "",
-  engineerName:  "Biswajit Deb Barman",
+  location: "",
+  engineerName: "Biswajit Deb Barman",
   engineerPhone: "",
   engineerEmail: "biswajitdebbarman.civil@gmail.com",
-  firmName:      "Urban Matrix",
-  date:          today(),
-  refNo:         "",
-  remarks:       "",
+  firmName: "Urban Matrix",
+  date: today(),
+  refNo: "",
+  remarks: "",
 };
 
-function TF({ label, value, onChange, placeholder = "", type = "text", required = false, hint = "" }) {
+function TF({
+  label,
+  value,
+  onChange,
+  placeholder = "",
+  type = "text",
+  required = false,
+  labelClass = "proj-compact-label",
+}) {
   return (
-    <div style={{ marginBottom: 14 }}>
-      <label className="proj-field-label">
+    <div className="proj-compact-field">
+      <label className={labelClass}>
         {label}
         {required && <span className="proj-required">*</span>}
       </label>
@@ -31,18 +39,7 @@ function TF({ label, value, onChange, placeholder = "", type = "text", required 
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        style={{ fontFamily: type === "tel" ? "var(--font-mono)" : "var(--font-sans)" }}
       />
-      {hint && <div className="field__hint">{hint}</div>}
-    </div>
-  );
-}
-
-function TA({ label, value, onChange, placeholder = "", rows = 2 }) {
-  return (
-    <div style={{ marginBottom: 14 }}>
-      <label className="proj-field-label">{label}</label>
-      <textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} rows={rows} style={{ resize: "vertical" }} />
     </div>
   );
 }
@@ -52,67 +49,124 @@ export default function ProjectDetails({ details, setDetails }) {
   const [open, setOpen] = useState(true);
 
   return (
-    <Card style={{ marginBottom: 22 }}>
-      <CardHeader
-        icon="📋"
-        title="Project & Client Details"
-        subtitle="These details will appear in the generated report"
-        action={
-          <button onClick={() => setOpen(v => !v)} className="btn btn--ghost btn--sm">
-            {open ? "▲ Collapse" : "▼ Expand"}
-          </button>
-        }
-      />
+    <Card className="proj-card">
+      <div className="proj-compact-header">
+        <div className="proj-compact-header__left">
+          <span className="proj-compact-header__icon">📋</span>
+          <span className="proj-compact-header__title">Project Details</span>
+          {details.projectName && (
+            <span className="proj-compact-header__name">
+              — {details.projectName}
+            </span>
+          )}
+        </div>
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="btn btn--ghost btn--sm"
+        >
+          {open ? "▲ Collapse" : "▼ Expand"}
+        </button>
+      </div>
 
       {open && (
-        <div style={{ padding: "20px 22px" }}>
-          <div className="proj-row1">
-            <TF label="Project Name" value={details.projectName} onChange={u("projectName")} placeholder="e.g. Residential G+2 Building" required />
-            <TF label="Ref No."      value={details.refNo}       onChange={u("refNo")}       placeholder="e.g. BBS/2025/001" />
-            <TF label="Date"         value={details.date}        onChange={u("date")}        type="date" required />
+        <div className="proj-compact-body">
+          {/* Row 1 */}
+          <div className="proj-row-fields proj-row-fields--row1">
+            <TF
+              label="Project Name"
+              value={details.projectName}
+              onChange={u("projectName")}
+              placeholder="e.g. Residential G+2 Building"
+              required
+            />
+            <TF
+              label="Client Name"
+              value={details.clientName}
+              onChange={u("clientName")}
+              placeholder="Ramesh Kumar Das"
+            />
+            <TF
+              label="Client Address"
+              value={details.clientAddress}
+              onChange={u("clientAddress")}
+              placeholder="e.g. Bhawanipur, Kolkata"
+            />
+            <TF
+              label="Site Location"
+              value={details.location}
+              onChange={u("location")}
+              placeholder="e.g. Salt Lake, Kolkata"
+            />
+            <TF
+              label="Ref No."
+              value={details.refNo}
+              onChange={u("refNo")}
+              placeholder="BBS/2025/001"
+            />
           </div>
 
-          <div className="proj-cols">
-            <div>
-              <div className="proj-section-title">👤 Client Details</div>
-              <TF label="Client Name"    value={details.clientName}    onChange={u("clientName")}    placeholder="e.g. Ramesh Kumar Das" required />
-              <TF label="Client Address" value={details.clientAddress} onChange={u("clientAddress")} placeholder="e.g. 12, Bhawanipur, Kolkata - 700025" />
-              <TF label="Site Location"  value={details.location}      onChange={u("location")}      placeholder="e.g. Plot No. 45, Salt Lake, Kolkata" required />
-            </div>
-            <div>
-              <div className="proj-section-title">🧑‍💼 Engineer / Firm Details</div>
-              <TF label="Engineer Name"  value={details.engineerName}  onChange={u("engineerName")}  placeholder="e.g. Er. Amit Banerjee" required />
-              <TF label="Firm / Company" value={details.firmName}      onChange={u("firmName")}      placeholder="e.g. Banerjee Structural Consultants" />
-              <TF label="Engineer Email" value={details.engineerEmail} onChange={u("engineerEmail")} placeholder="e.g. amit@firm.com" type="email" />
+          {/* Row 2 */}
+          <div className="proj-row-fields proj-row-fields--row2">
+            <TF
+              label="Date"
+              value={details.date}
+              onChange={u("date")}
+              type="date"
+              required
+            />
+            <TF
+              label="Engineer Name"
+              value={details.engineerName}
+              onChange={u("engineerName")}
+              placeholder="Er. Amit Banerjee"
+            />
+            <TF
+              label="Firm / Office"
+              value={details.firmName}
+              onChange={u("firmName")}
+              placeholder="Banerjee Structural Consultants"
+            />
+            <TF
+              label="Email"
+              value={details.engineerEmail}
+              onChange={u("engineerEmail")}
+              placeholder="amit@firm.com"
+              type="email"
+            />
 
-              <div style={{ marginBottom: 14 }}>
-                <label className="proj-field-label" style={{ color: "#059669" }}>
-                  📱 WhatsApp Number <span className="proj-required">*</span>
-                </label>
-                <div className="wa-input-wrap">
-                  <span className="wa-input-prefix">+91</span>
-                  <input
-                    type="tel"
-                    value={details.engineerPhone}
-                    onChange={(e) => u("engineerPhone")(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                    placeholder="9876543210"
-                    maxLength={10}
-                    className="wa-input"
-                    style={{ paddingLeft: "44px" }}
-                  />
-                  <span className="wa-input-suffix">💬</span>
-                </div>
-                <div className="wa-hint">✓ Report PDF will be sent directly to this WhatsApp number</div>
+            {/* WhatsApp */}
+            <div className="proj-compact-field">
+              <label className="proj-compact-label proj-compact-label--wa">
+                📱 Phone (WhatsApp)
+              </label>
+              <div className="proj-wa-wrap">
+                <span className="proj-wa-prefix">+91</span>
+                <input
+                  type="tel"
+                  value={details.engineerPhone}
+                  onChange={(e) =>
+                    u("engineerPhone")(
+                      e.target.value.replace(/\D/g, "").slice(0, 10),
+                    )
+                  }
+                  placeholder="9876543210"
+                  maxLength={10}
+                  className="proj-wa-input"
+                />
               </div>
             </div>
           </div>
 
-          <TA
-            label="Remarks / Notes"
-            value={details.remarks}
-            onChange={u("remarks")}
-            placeholder="e.g. Steel as per HYSD Fe-500D. All dimensions in metres. Verify with structural drawings before procurement."
-          />
+          {/* Remarks */}
+          <div>
+            <label className="proj-remarks-label">Remarks / Notes</label>
+            <input
+              type="text"
+              value={details.remarks}
+              onChange={(e) => u("remarks")(e.target.value)}
+              placeholder="e.g. Steel as per HYSD Fe-500D. All dimensions in metres. Verify with structural drawings."
+            />
+          </div>
         </div>
       )}
     </Card>

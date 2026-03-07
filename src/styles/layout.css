@@ -1,82 +1,129 @@
 /* ─── LAYOUT UTILITIES ──────────────────────────────────────────────────────── */
-
-/* Page padding */
 .page-pad {
-  padding-left: 36px;
-  padding-right: 36px;
+  padding-left: 50px;
+  padding-right: 50px;
 }
-@media (max-width: 768px) { .page-pad { padding-left: 16px; padding-right: 16px; } }
-@media (max-width: 400px)  { .page-pad { padding-left: 12px; padding-right: 12px; } }
 
-/* Horizontal scroll strips */
+@media (max-width: 768px) {
+  .page-pad {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+@media (max-width: 400px) {
+  .page-pad {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
 .hscroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   flex-wrap: nowrap !important;
 }
 
-/* Table wrapper */
 .tbl-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   border-radius: var(--radius-sm);
 }
 
-/* ─── GRID LAYOUTS ─────────────────────────────────────────────────────────── */
-
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
 }
-@media (max-width: 700px)  { .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
-@media (max-width: 380px)  { .kpi-grid { grid-template-columns: 1fr; } }
+
+@media (max-width: 700px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+@media (max-width: 380px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 .proj-row1 {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
   gap: 0 16px;
 }
-@media (max-width: 580px) { .proj-row1 { grid-template-columns: 1fr; } }
+
+@media (max-width: 580px) {
+  .proj-row1 {
+    grid-template-columns: 1fr;
+  }
+}
 
 .proj-cols {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0 28px;
 }
-@media (max-width: 640px) { .proj-cols { grid-template-columns: 1fr; } }
+
+@media (max-width: 640px) {
+  .proj-cols {
+    grid-template-columns: 1fr;
+  }
+}
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0 14px;
 }
-@media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
+
+@media (max-width: 500px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 .cost-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
-@media (max-width: 680px) { .cost-grid { grid-template-columns: 1fr; } }
+
+@media (max-width: 680px) {
+  .cost-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 .reports-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 18px;
 }
-@media (max-width: 480px) { .reports-grid { grid-template-columns: 1fr; } }
 
-/* ─── FLEX UTILITIES ───────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .reports-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 .action-bar {
   display: flex;
   gap: 12px;
   align-items: center;
 }
+
 @media (max-width: 560px) {
-  .action-bar { flex-direction: column; }
-  .action-bar button { width: 100% !important; justify-content: center; }
+  .action-bar {
+    flex-direction: column;
+  }
+
+  .action-bar button {
+    width: 100% !important;
+    justify-content: center;
+  }
 }
 
 .calc-cta {
@@ -86,9 +133,16 @@
   flex-wrap: wrap;
   gap: 14px;
 }
+
 @media (max-width: 560px) {
-  .calc-cta { flex-direction: column; align-items: stretch; }
-  .calc-cta button { width: 100% !important; }
+  .calc-cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .calc-cta button {
+    width: 100% !important;
+  }
 }
 
 .result-cta {
@@ -98,7 +152,13 @@
   flex-wrap: wrap;
   gap: 12px;
 }
-@media (max-width: 560px) { .result-cta { flex-direction: column; align-items: stretch; } }
+
+@media (max-width: 560px) {
+  .result-cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
 
 .item-hdr {
   display: flex;
@@ -106,8 +166,19 @@
   gap: 10px;
   flex-wrap: nowrap;
 }
-@media (max-width: 520px) { .item-hdr { flex-wrap: wrap; } }
 
-/* ─── HEADER HEIGHT ────────────────────────────────────────────────────────── */
-.site-header { height: 68px; }
-@media (max-width: 600px) { .site-header { height: 60px; } }
+@media (max-width: 520px) {
+  .item-hdr {
+    flex-wrap: wrap;
+  }
+}
+
+.site-header {
+  height: 68px;
+}
+
+@media (max-width: 600px) {
+  .site-header {
+    height: 60px;
+  }
+}

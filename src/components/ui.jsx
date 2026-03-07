@@ -16,9 +16,7 @@ export function CardHeader({ title, subtitle, action, icon }) {
           {icon && <span className="card__header-icon">{icon}</span>}
           <span className="card__header-title">{title}</span>
         </div>
-        {subtitle && (
-          <div className="card__header-subtitle">{subtitle}</div>
-        )}
+        {subtitle && <div className="card__header-subtitle">{subtitle}</div>}
       </div>
       {action}
     </div>
@@ -72,9 +70,7 @@ export function Button({ children, onClick, variant = "primary", size = "md", fu
 }
 
 export function Badge({ label, color = "blue" }) {
-  return (
-    <span className={`badge badge--${color}`}>{label}</span>
-  );
+  return <span className={`badge badge--${color}`}>{label}</span>;
 }
 
 export function Divider({ label }) {

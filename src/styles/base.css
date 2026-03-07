@@ -1,5 +1,4 @@
 /* ─── RESET & BASE ───────────────────────────────────────────────────────────── */
-
 *,
 *::before,
 *::after {
@@ -23,8 +22,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
-
-/* ─── FORM ELEMENTS ────────────────────────────────────────────────────────── */
 
 input[type=number],
 input[type=text],
@@ -55,7 +52,6 @@ textarea {
   select,
   textarea {
     font-size: 16px;
-    /* Prevent iOS zoom */
   }
 }
 
@@ -77,8 +73,6 @@ button {
   transition: all var(--transition);
 }
 
-/* ─── SCROLLBARS ──────────────────────────────────────────────────────────── */
-
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -96,8 +90,6 @@ button {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-4);
 }
-
-/* ─── ANIMATIONS ─────────────────────────────────────────────────────────── */
 
 @keyframes fadeUp {
   from {

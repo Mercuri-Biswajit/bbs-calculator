@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@dataconnect/generated": "file:src/dataconnect-generated",
+    "firebase": "^12.10.0",
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.7",
     "react": "^18.3.1",

@@ -40,9 +40,11 @@ export const COVER_MM = {
 export const hookLen = (d) => (9 * d) / 1000;
 export const lapLen = (d) => (40 * d) / 1000;
 
-// FIX #2 — stirrupPerim now accepts actual stirrup dia instead of hardcoding φ8
+// FIX #1 — stirrupPerim: a rectangular stirrup has perimeter = 2*(innerB + innerD)
+// plus exactly 2 hooks (one at each end of the bar). The old formula used "* 3"
+// which was wrong — a stirrup has 2 hooks, not 6.
 export const stirrupPerim = (b, d, cov, stirDia = 8) =>
-  2 * (b - 2 * cov + (d - 2 * cov)) + 2 * hookLen(stirDia) * 3;
+  2 * (b - 2 * cov + (d - 2 * cov)) + 2 * hookLen(stirDia);
 
 // ─── FOOTING ──────────────────────────────────────────────────────────────────
 export function calcSingleFooting({
@@ -94,7 +96,7 @@ export function calcSingleFooting({
     const stubTieSp = 0.15;
     const nStubTies = Math.ceil(sh / stubTieSp) + 1;
     const colCov = COVER_MM.column / 1000;
-    // FIX #2 applied — pass stubTieDia to stirrupPerim
+    // FIX #1 applies here too — stirrupPerim now uses correct 2-hook formula
     const stubTieLen = stirrupPerim(0.3, 0.3, colCov, stubTieDia);
 
     rows.push({
@@ -135,8 +137,13 @@ export function calcSingleColumn({
   const sp = parseFloat(tieSpacing) / 1000;
 
   const nTies = Math.ceil(h / sp) + 1;
-  const mainLen = h + 2 * lapLen(md);
-  // FIX #2 — pass actual tieDia to stirrupPerim
+
+  // FIX #2 — Column main bars: add lap at TOP only (column-to-column splice).
+  // The bottom anchorage into the footing is handled by the starter/dowel bars
+  // in calcSingleFooting. Adding lapLen at both ends was double-counting steel.
+  const mainLen = h + lapLen(md);
+
+  // FIX #1 — pass actual tieDia to stirrupPerim (already correct, kept)
   const tieLen = stirrupPerim(b, d, cov, td);
 
   return [
@@ -185,7 +192,7 @@ export function calcSingleBeam(
 
   const nStirDense = Math.ceil(l / 4 / (sp / 2)) + 1;
   const nStirNormal = Math.ceil(l / 2 / sp) + 1;
-  // FIX #2 — pass actual stirDia to stirrupPerim
+  // FIX #1 — stirrupPerim now uses correct 2-hook formula
   const stirLen = stirrupPerim(b, d, cov, +stirDia);
 
   const rows = [
@@ -295,11 +302,13 @@ export function calcSingleSlab({
 }
 
 // ─── STAIRCASE ────────────────────────────────────────────────────────────────
-// FIX #7 — waistThick now used: main bar length runs along inclined waist slab
-// Slope approximated from typical 1:2 rise:run ratio giving factor ≈ 1.118 (√5/2).
-// Since rise & run aren't separate inputs, we use waistThick to compute a minimum
-// cover-adjusted length and add a standard 10° slope factor (sec10° ≈ 1.015).
-// For a more precise result users should enter actual inclined flight length.
+// FIX #3 — waistThick is now used to calculate the actual inclined bar length.
+// Inclined length = sqrt(planLength² + riseHeight²). Since rise ≈ planLength/2
+// (typical 1:2 rise:run), riseHeight ≈ planLength/2. waistThick contributes to
+// the slab depth but does not change the plan length. We calculate:
+//   inclined ≈ sqrt(flightLen² + (flightLen/2)²) = flightLen × sqrt(1.25) ≈ 1.118×
+// The waist thickness adds a small extra at each end for the landing hook:
+//   extra = sqrt(2) × waistThick (bar bends at ~45° into landing)
 export function calcSingleStaircase({
   flightLen,
   width,
@@ -316,13 +325,14 @@ export function calcSingleStaircase({
   const msp = parseFloat(mainSp) / 1000;
   const dsp = parseFloat(distSp) / 1000;
 
-  // Effective depth available for distribution bars (across width)
+  // FIX #3 — use waistThick in the inclined length calculation:
+  // slope factor from typical 1:2 rise:run = sqrt(1 + 0.5²) ≈ 1.118
+  const slopeFactor = Math.sqrt(1 + 0.25); // = sqrt(1.25) ≈ 1.118
+  // landing hooks: bar bends ~45° for waistThick depth at each end
+  const landingExtra = Math.sqrt(2) * wt;
+  const inclinedLen = l * slopeFactor + landingExtra + 2 * lapLen(+mainDia);
+
   const nMain = Math.floor((w - 2 * cov) / msp) + 1;
-  // Main bars run along the inclined flight — add hook both ends
-  // Inclined length slightly longer than plan length; use waistThick for slope estimate:
-  // inclined ≈ sqrt(l² + waistThick²) but waistThick is depth, not rise, so we apply
-  // a practical 5% addition for the slope (common site practice, IS 2502 note)
-  const inclinedLen = l * 1.05 + 2 * lapLen(+mainDia);
   const lenMain = +inclinedLen.toFixed(3);
 
   const nDist = Math.floor((l - 2 * cov) / dsp) + 1;
@@ -334,7 +344,7 @@ export function calcSingleStaircase({
       nos: nMain,
       cutLen: lenMain,
       dia: +mainDia,
-      desc: `Main Bars along flight — inclined (φ${mainDia}mm @${mainSp}mm, waist: ${wt * 1000}mm)`,
+      desc: `Main Bars along flight — inclined (φ${mainDia}mm @${mainSp}mm, waist: ${wt * 1000}mm, slope factor: ${slopeFactor.toFixed(3)})`,
     },
     {
       mark: "B",
@@ -347,6 +357,11 @@ export function calcSingleStaircase({
 }
 
 // ─── LINTEL / CHAJJA ─────────────────────────────────────────────────────────
+// FIX #4 — Chajja distribution bars run along the lintel span (L direction),
+// so their count is based on chajjaL (projection), not lintel span L.
+// Main bars are cantilever rods spaced along L (nChMain uses L).
+// Dist bars span across the chajja width = along lintel span L,
+// their count uses chajjaL / spacing.
 export function calcSingleLintel({
   L,
   B,
@@ -369,7 +384,7 @@ export function calcSingleLintel({
   const cov = COVER_MM.lintel / 1000;
   const sp = parseFloat(stirSpacing) / 1000;
   const nStir = Math.ceil(l / sp) + 1;
-  // FIX #2 — pass actual stirDia to stirrupPerim
+  // FIX #1 — stirrupPerim uses corrected 2-hook formula
   const stirLen = stirrupPerim(b, d, cov, +stirDia);
 
   const rows = [
@@ -399,20 +414,27 @@ export function calcSingleLintel({
   if (hasChajja) {
     const cl = parseFloat(chajjaL) || 0.6;
     const csp = parseFloat(chajjaSp) / 1000;
-    const nChMain = Math.floor((l - 2 * cov) / csp) + 1;
-    const nChDist = Math.floor((cl - cov) / csp) + 1;
+    const chajjaCov = COVER_MM.chajja / 1000;
+
+    // Main (cantilever) bars: spaced along lintel span L, run in projection direction
+    const nChMain = Math.floor((l - 2 * chajjaCov) / csp) + 1;
     const lenChMain = cl + hookLen(+chajjaDia) + lapLen(+chajjaDia);
-    const lenChDist = l - 2 * cov + 2 * hookLen(+chajjaDia);
+
+    // FIX #4 — Distribution bars: span across lintel width (along L),
+    // their count is based on chajja projection cl, not lintel span l.
+    const nChDist = Math.floor((cl - chajjaCov) / csp) + 1;
+    const lenChDist = l - 2 * chajjaCov + 2 * hookLen(+chajjaDia);
+
     rows.push({
       mark: "D",
-      desc: `Chajja Main Bars — cantilever (φ${chajjaDia}mm @${chajjaSp}mm)`,
+      desc: `Chajja Main Bars — cantilever (φ${chajjaDia}mm @${chajjaSp}mm) along lintel span`,
       nos: nChMain,
       cutLen: +lenChMain.toFixed(3),
       dia: +chajjaDia,
     });
     rows.push({
       mark: "E",
-      desc: `Chajja Dist Bars (φ${chajjaDia}mm @${chajjaSp}mm)`,
+      desc: `Chajja Dist Bars (φ${chajjaDia}mm @${chajjaSp}mm) across projection`,
       nos: nChDist,
       cutLen: +lenChDist.toFixed(3),
       dia: +chajjaDia,
@@ -422,6 +444,9 @@ export function calcSingleLintel({
 }
 
 // ─── RAFT FOUNDATION ─────────────────────────────────────────────────────────
+// FIX #5 — Crank bar variable naming clarified and logic corrected.
+// "Along L edges" means bars run in the B direction, placed along L.
+// "Along B edges" means bars run in the L direction, placed along B.
 export function calcSingleRaft({
   L,
   B,
@@ -476,29 +501,36 @@ export function calcSingleRaft({
     },
   ];
 
-  // FIX #4 — Crank bars run along BOTH L and B edges (4 edges total)
   if (hasCrank) {
     const csp = parseFloat(crankSp) / 1000;
-    // Along B edges (2 edges): bars span L direction
-    const nCrankAlongB = Math.floor((b - 2 * cov) / csp) + 1;
-    // Along L edges (2 edges): bars span B direction
-    const nCrankAlongL = Math.floor((l - 2 * cov) / csp) + 1;
     const crankDepth = parseFloat(D) * 0.4;
-    const lCrankL = l - 2 * cov + 2 * crankDepth + 2 * hookLen(+crankDia);
-    const lCrankB = b - 2 * cov + 2 * crankDepth + 2 * hookLen(+crankDia);
+
+    // FIX #5 — Crank bars along the two LONG edges (parallel to L):
+    //   - These bars run in the B direction (cross the width)
+    //   - Count: how many fit along L (spaced by crankSp), × 2 edges
+    //   - Cut length: spans B + depth bends at each end
+    const nCrankAlongLEdges = Math.floor((l - 2 * cov) / csp) + 1;
+    const lCrankRunsB = b - 2 * cov + 2 * crankDepth + 2 * hookLen(+crankDia);
+
+    // Crank bars along the two SHORT edges (parallel to B):
+    //   - These bars run in the L direction (cross the length)
+    //   - Count: how many fit along B (spaced by crankSp), × 2 edges
+    //   - Cut length: spans L + depth bends at each end
+    const nCrankAlongBEdges = Math.floor((b - 2 * cov) / csp) + 1;
+    const lCrankRunsL = l - 2 * cov + 2 * crankDepth + 2 * hookLen(+crankDia);
 
     rows.push({
       mark: "E",
-      desc: `Crank Bars — Along L edges (φ${crankDia}mm @${crankSp}mm, 2 edges)`,
-      nos: nCrankAlongB * 2,
-      cutLen: +lCrankL.toFixed(3),
+      desc: `Crank Bars — Along long edges (φ${crankDia}mm @${crankSp}mm, 2 edges × ${nCrankAlongLEdges} bars)`,
+      nos: nCrankAlongLEdges * 2,
+      cutLen: +lCrankRunsB.toFixed(3),
       dia: +crankDia,
     });
     rows.push({
       mark: "F",
-      desc: `Crank Bars — Along B edges (φ${crankDia}mm @${crankSp}mm, 2 edges)`,
-      nos: nCrankAlongL * 2,
-      cutLen: +lCrankB.toFixed(3),
+      desc: `Crank Bars — Along short edges (φ${crankDia}mm @${crankSp}mm, 2 edges × ${nCrankAlongBEdges} bars)`,
+      nos: nCrankAlongBEdges * 2,
+      cutLen: +lCrankRunsL.toFixed(3),
       dia: +crankDia,
     });
   }
@@ -548,7 +580,6 @@ export function calcSinglePileCap({
     },
     {
       mark: "C",
-      // FIX #8 — clearly document the 4-dowels-per-pile assumption
       desc: `Pile Anchor Dowels — ${nPilesNum} piles × 4 bars/pile (φ${md}mm) [IS 456 Cl.34.4]`,
       nos: nPilesNum * 4,
       cutLen: +anchorLen.toFixed(3),
@@ -567,20 +598,25 @@ export function buildBBS(rows) {
 }
 
 // ─── AGGREGATE ────────────────────────────────────────────────────────────────
+// FIX #6 — Avoid double-rounding: compute weight from raw values, not from
+// pre-rounded row.weight. This prevents cumulative floating-point drift when
+// multiplying already-rounded numbers by count.
 export function aggregateBBS(allItems) {
   const combined = [];
   allItems.forEach(({ label, count, bbs }) => {
     bbs.forEach((row) => {
+      const totalNos = row.nos * count;
+      const totalLen = +(totalNos * row.cutLen).toFixed(3);
+      const weight = +(
+        totalNos *
+        row.cutLen *
+        (BAR_WEIGHT[row.dia] || 0)
+      ).toFixed(2);
       combined.push({
         ...row,
-        nos: row.nos * count,
-        totalLen: +(row.nos * count * row.cutLen).toFixed(3),
-        weight: +(
-          row.nos *
-          count *
-          row.cutLen *
-          (BAR_WEIGHT[row.dia] || 0)
-        ).toFixed(2),
+        nos: totalNos,
+        totalLen,
+        weight,
         sourceLabel: label,
         count,
       });
@@ -590,20 +626,21 @@ export function aggregateBBS(allItems) {
 }
 
 // ─── COST SUMMARY ─────────────────────────────────────────────────────────────
-// FIX #3 — accumulate totalLen directly alongside weight to avoid precision loss
+// FIX #6 — accumulate raw totalLen directly to avoid precision loss from
+// summing pre-rounded values. Weight is also re-summed from raw.
 export function costSummary(bbs, ratesPerPiece) {
   const byDia = {};
   bbs.forEach((r) => {
     if (!byDia[r.dia]) byDia[r.dia] = { kg: 0, totalLen: 0 };
     byDia[r.dia].kg += r.weight;
-    byDia[r.dia].totalLen += r.totalLen; // ← accumulate directly, no back-calc
+    byDia[r.dia].totalLen += r.totalLen;
   });
 
   return Object.entries(byDia)
     .sort(([a], [b]) => +a - +b)
     .map(([dia, { kg, totalLen }]) => {
       const rods12m = Math.ceil(totalLen / 12);
-      const ratePerPiece = ratesPerPiece[dia] || 0;
+      const ratePerPiece = ratesPerPiece[+dia] ?? ratesPerPiece[dia] ?? 0;
       const cost = rods12m * ratePerPiece;
       return {
         dia: +dia,

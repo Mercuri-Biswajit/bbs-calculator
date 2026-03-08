@@ -1,4 +1,7 @@
 // src/components/ReportsHistory.jsx
+// FIX #7 — Replaced direct localStorage calls with window.storage persistent API.
+// localStorage is not supported in the artifact environment and silently fails,
+// causing every save to return { ok: false } and showing the "storage full" banner.
 
 import { useState, useEffect } from "react";
 import { Card, CardHeader, Button, Badge } from "./ui.jsx";
@@ -6,80 +9,101 @@ import { downloadPDF } from "../utils/pdfReport.js";
 
 const STORAGE_KEY = "bbs_saved_reports";
 
-// FIX #8 — saveReport now returns a status object so callers can surface errors to the user
-export function saveReport(reportData) {
+// ─── Storage helpers using window.storage API ────────────────────────────────
+
+async function getSavedReports() {
   try {
-    const reports = getSavedReports();
+    const result = await window.storage.get(STORAGE_KEY);
+    return result ? JSON.parse(result.value) : [];
+  } catch {
+    return [];
+  }
+}
+
+async function persistReports(reports) {
+  try {
+    await window.storage.set(STORAGE_KEY, JSON.stringify(reports));
+    return { ok: true };
+  } catch (error) {
+    console.error("Storage error:", error);
+    return { ok: false, error };
+  }
+}
+
+// Public API — mirrors the old synchronous API but now async
+export async function saveReport(reportData) {
+  try {
+    const reports = await getSavedReports();
     const newReport = {
       id: Date.now().toString(),
       timestamp: new Date().toISOString(),
       ...reportData,
     };
     reports.unshift(newReport);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
-    return { ok: true, report: newReport };
+    // Keep only the last 50 reports to avoid hitting storage limits
+    const trimmed = reports.slice(0, 50);
+    const result = await persistReports(trimmed);
+    return result.ok
+      ? { ok: true, report: newReport }
+      : { ok: false, quota: false, error: result.error };
   } catch (error) {
     console.error("Error saving report:", error);
-    // Distinguish quota exceeded from other errors
-    const isQuota =
-      error instanceof DOMException &&
-      (error.code === 22 ||
-        error.code === 1014 ||
-        error.name === "QuotaExceededError" ||
-        error.name === "NS_ERROR_DOM_QUOTA_REACHED");
-    return { ok: false, quota: isQuota, error };
+    return { ok: false, quota: false, error };
   }
 }
 
-export function getSavedReports() {
+export async function deleteReport(id) {
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch {
-    return [];
-  }
-}
-
-export function deleteReport(id) {
-  try {
-    const filtered = getSavedReports().filter((r) => r.id !== id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    const reports = await getSavedReports();
+    const filtered = reports.filter((r) => r.id !== id);
+    await persistReports(filtered);
     return true;
   } catch {
     return false;
   }
 }
 
-export function clearAllReports() {
+export async function clearAllReports() {
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    await window.storage.delete(STORAGE_KEY);
     return true;
   } catch {
     return false;
   }
 }
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function ReportsHistory({ onLoadReport, onClose }) {
   const [reports, setReports] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadReports();
   }, []);
 
-  const loadReports = () => setReports(getSavedReports());
-  const handleDelete = (id) => {
+  const loadReports = async () => {
+    setLoading(true);
+    const data = await getSavedReports();
+    setReports(data);
+    setLoading(false);
+  };
+
+  const handleDelete = async (id) => {
     if (confirm("Delete this report?")) {
-      deleteReport(id);
-      loadReports();
+      await deleteReport(id);
+      await loadReports();
     }
   };
-  const handleClearAll = () => {
+
+  const handleClearAll = async () => {
     if (confirm("Delete ALL saved reports? This cannot be undone.")) {
-      clearAllReports();
-      loadReports();
+      await clearAllReports();
+      await loadReports();
     }
   };
+
   const handleDownload = (report) =>
     downloadPDF(report.details, report.byType, report.allRows, report.costs);
 
@@ -177,7 +201,19 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
         className="page-pad"
         style={{ maxWidth: 1400, margin: "0 auto", paddingTop: 0 }}
       >
-        {reports.length > 0 && (
+        {loading && (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "60px 20px",
+              color: "var(--text-3)",
+            }}
+          >
+            Loading reports…
+          </div>
+        )}
+
+        {!loading && reports.length > 0 && (
           <div className="search-input-wrap">
             <span className="search-input-icon">🔍</span>
             <input
@@ -190,7 +226,7 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
           </div>
         )}
 
-        {reports.length === 0 && (
+        {!loading && reports.length === 0 && (
           <div
             style={{
               textAlign: "center",
@@ -378,7 +414,7 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
           </div>
         )}
 
-        {reports.length > 0 && filteredReports.length === 0 && (
+        {!loading && reports.length > 0 && filteredReports.length === 0 && (
           <div
             style={{
               textAlign: "center",

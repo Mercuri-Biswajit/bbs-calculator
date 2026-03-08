@@ -583,9 +583,10 @@ export default function ResultPage({
             <CardHeader
               icon="💰"
               title="Material Estimate & Cost Summary"
-              subtitle="West Bengal Market Rate · Per-piece (12m rod)"
+              subtitle="West Bengal Market Rate · Per-piece (12m rod) — edit rates below to update instantly"
             />
             <div className="card-body-pad">
+              {/* FIX #8 — onRateChange now triggers immediate cost recalc in App.jsx */}
               <CostTable
                 costs={costs}
                 onRateChange={onRateChange}
@@ -597,7 +598,7 @@ export default function ResultPage({
         )}
 
         {/* Bottom CTA */}
-        <div className="result-cta cta-block">
+        <div className="result-cta cta-block" style={{ marginTop: 24 }}>
           <div>
             <div className="cta-block__title">📄 Generate & Share Report</div>
             <div className="cta-block__sub">

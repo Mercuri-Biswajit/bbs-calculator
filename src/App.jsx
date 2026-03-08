@@ -53,7 +53,6 @@ export default function App() {
   const [details, setDetails] = useState(DEFAULT_PROJECT);
   const [rates, setRates] = useState({ ...DEFAULT_RATES_PER_PIECE });
   const [result, setResult] = useState(null);
-  // FIX #8 — surface localStorage errors to the user
   const [saveError, setSaveError] = useState(null);
 
   // ─── Element state ─────────────────────────────────────────────────────────
@@ -118,23 +117,22 @@ export default function App() {
 
     setResult(data);
 
-    // FIX #8 — show feedback if save fails (e.g. quota exceeded)
-    const saveResult = saveReport({
+    // FIX #7 — saveReport is now async (uses window.storage); handle the promise
+    saveReport({
       details: { ...details },
       byType,
       allRows,
       costs,
       rates: { ...rates },
+    }).then((saveResult) => {
+      if (!saveResult.ok) {
+        setSaveError(
+          "⚠️ Report generated but could not be saved to history due to a storage error.",
+        );
+      } else {
+        setSaveError(null);
+      }
     });
-    if (!saveResult.ok) {
-      setSaveError(
-        saveResult.quota
-          ? "⚠️ Report generated but could not be saved — browser storage is full. Clear old reports to free space."
-          : "⚠️ Report generated but could not be saved to history due to a storage error.",
-      );
-    } else {
-      setSaveError(null);
-    }
 
     setViewMode("result");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -151,6 +149,46 @@ export default function App() {
     rates,
     details,
   ]);
+
+  // FIX #8 — handleRecalculate: recalculates BBS+costs with current rates
+  // so that editing rates on ResultPage produces a fully consistent result.
+  const handleRecalculate = useCallback(
+    (newRates) => {
+      const byType = allItemsByType.map(({ type, items }) => ({
+        type,
+        items,
+        rows: aggregateBBS(calcItems(type, items)),
+      }));
+      const allRows = byType.flatMap((t) => t.rows);
+      const costs = costSummary(allRows, newRates || rates);
+      setResult({ byType, allRows, costs });
+    },
+    [
+      footings,
+      columns,
+      plinthBeams,
+      wallBeams,
+      slabs,
+      staircases,
+      lintels,
+      rafts,
+      pileCaps,
+      rates,
+    ],
+  );
+
+  const handleRateChange = useCallback(
+    (dia, val) => {
+      const newRates = { ...rates, [dia]: val };
+      setRates(newRates);
+      // FIX #8 — immediately recalculate costs when a rate is edited on ResultPage
+      if (result) {
+        const costs = costSummary(result.allRows, newRates);
+        setResult((prev) => ({ ...prev, costs }));
+      }
+    },
+    [rates, result],
+  );
 
   const handleLoadReport = (report) => {
     setResult({
@@ -174,7 +212,7 @@ export default function App() {
         showHistoryButton={viewMode !== "history"}
       />
 
-      {/* FIX #8 — storage error banner */}
+      {/* Storage error banner */}
       {saveError && (
         <div
           style={{
@@ -217,7 +255,7 @@ export default function App() {
           result={result}
           rates={rates}
           details={details}
-          onRateChange={updateRate}
+          onRateChange={handleRateChange}
           onBack={() => setViewMode("calculator")}
         />
       )}

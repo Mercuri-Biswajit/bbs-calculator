@@ -521,6 +521,9 @@ export function DrawingColumn({ B, D, mainDia, mainNos, tieDia, tieSpacing }) {
   );
 }
 
+// FIX #9 — DrawingBeam elevation: stirrups are now drawn as individual horizontal
+// lines at their correct spacing positions, not as full-height overlapping rects.
+// Dense zone shading is shown at each end (L/4), normal zone in the middle.
 export function DrawingBeam({
   B,
   D,
@@ -554,13 +557,37 @@ export function DrawingBeam({
     { length: nTop },
     (_, i) => ox + cov + i * (nTop > 1 ? (bw - 2 * cov) / (nTop - 1) : 0),
   );
-  const eX = ox + bw + 28,
-    eW = 60,
-    spPx = Math.max(14, (+stirSpacing / 1000) * scale),
-    nSh = Math.min(5, Math.ceil(dh / spPx) + 1);
 
-  // Dense zone shading on elevation
+  const eX = ox + bw + 28,
+    eW = 60;
   const denseW = eW * 0.25;
+
+  // FIX #9 — compute stirrup line positions scaled to elevation height
+  // Dense zone: L/4 each end at spacing/2; Normal zone: middle L/2 at spacing
+  // We represent the elevation as dh tall, so scale spacing to pixels
+  const normalSpPx = Math.max(10, (+stirSpacing / 1000) * scale);
+  const denseSpPx = normalSpPx / 2;
+  const denseZoneH = dh * 0.25; // L/4 of beam = 25% of elevation height
+
+  // Collect stirrup y positions
+  const stirrupYs = [];
+  // Dense zone — left (top in elevation = start of beam)
+  for (let y = 0; y <= denseZoneH; y += denseSpPx) {
+    stirrupYs.push({ y: oy + y, dense: true });
+  }
+  // Normal zone — middle
+  for (
+    let y = denseZoneH + normalSpPx;
+    y <= dh - denseZoneH - normalSpPx;
+    y += normalSpPx
+  ) {
+    stirrupYs.push({ y: oy + y, dense: false });
+  }
+  // Dense zone — right (bottom in elevation = end of beam)
+  for (let y = dh - denseZoneH; y <= dh; y += denseSpPx) {
+    stirrupYs.push({ y: oy + y, dense: true });
+  }
+
   return (
     <BlueprintSVG
       width={W}
@@ -609,7 +636,8 @@ export function DrawingBeam({
         offset={-18}
         vertical
       />
-      {/* Elevation with zones */}
+
+      {/* Elevation box */}
       <rect
         x={eX}
         y={oy}
@@ -619,34 +647,26 @@ export function DrawingBeam({
         stroke={DC.outline}
         strokeWidth="1.5"
       />
-      {/* Dense zone L/4 each end */}
+      {/* Dense zone shading — each end */}
       <rect
         x={eX}
         y={oy}
-        width={denseW}
-        height={dh}
+        width={eW}
+        height={denseZoneH}
         fill="rgba(220,38,38,.08)"
         stroke="none"
       />
       <rect
-        x={eX + eW - denseW}
-        y={oy}
-        width={denseW}
-        height={dh}
+        x={eX}
+        y={oy + dh - denseZoneH}
+        width={eW}
+        height={denseZoneH}
         fill="rgba(220,38,38,.08)"
         stroke="none"
       />
+      {/* Zone labels */}
       <text
-        x={eX + denseW / 2}
-        y={oy - 3}
-        textAnchor="middle"
-        fill="#dc2626"
-        style={{ fontSize: 7, fontFamily: "monospace" }}
-      >
-        DENSE
-      </text>
-      <text
-        x={eX + eW - denseW / 2}
+        x={eX + eW / 2}
         y={oy - 3}
         textAnchor="middle"
         fill="#dc2626"
@@ -656,13 +676,14 @@ export function DrawingBeam({
       </text>
       <text
         x={eX + eW / 2}
-        y={oy - 3}
+        y={oy + dh / 2}
         textAnchor="middle"
         fill="#059669"
         style={{ fontSize: 7, fontFamily: "monospace" }}
       >
         NORMAL
       </text>
+      {/* Longitudinal bars in elevation */}
       <line
         x1={eX + 3}
         y1={oy}
@@ -679,17 +700,17 @@ export function DrawingBeam({
         stroke={DC.main}
         strokeWidth="1.5"
       />
-      {Array.from({ length: nSh }).map((_, i) => (
-        <rect
+      {/* FIX #9 — Draw individual stirrup lines at correct positions */}
+      {stirrupYs.map((s, i) => (
+        <line
           key={i}
-          x={eX + 2}
-          y={oy + 4 + i * spPx}
-          width={eW - 4}
-          height={Math.min(dh - 8, dh * 0.8)}
-          fill="none"
-          stroke={DC.tie}
-          strokeWidth="1.2"
-          opacity={0.8 - i * 0.12}
+          x1={eX + 2}
+          y1={s.y}
+          x2={eX + eW - 2}
+          y2={s.y}
+          stroke={s.dense ? "#dc2626" : DC.tie}
+          strokeWidth={s.dense ? 1.5 : 1.2}
+          opacity={0.85}
         />
       ))}
       <Legend
@@ -965,7 +986,10 @@ export function DrawingLintel({
   const spPx = Math.max(12, (+stirSpacing / 1000) * scale);
   const eX = ox + bw + 24,
     eW = 55;
-  const nSh = Math.min(6, Math.ceil(dh / spPx) + 1);
+
+  // FIX #9 applied to lintel elevation too: draw individual stirrup lines
+  const stirrupYs = [];
+  for (let y = 0; y <= dh; y += spPx) stirrupYs.push(y);
 
   return (
     <BlueprintSVG
@@ -1084,17 +1108,17 @@ export function DrawingLintel({
         stroke={DC.main}
         strokeWidth="1.5"
       />
-      {Array.from({ length: nSh }).map((_, i) => (
-        <rect
+      {/* FIX #9 — individual stirrup lines at correct positions */}
+      {stirrupYs.map((y, i) => (
+        <line
           key={i}
-          x={eX + 2}
-          y={oy + 3 + i * spPx}
-          width={eW - 4}
-          height={Math.max(dh - 6, 10)}
-          fill="none"
+          x1={eX + 2}
+          y1={oy + y}
+          x2={eX + eW - 2}
+          y2={oy + y}
           stroke={DC.tie}
-          strokeWidth="1"
-          opacity={0.7}
+          strokeWidth="1.2"
+          opacity={0.8}
         />
       ))}
       <DimLine
@@ -1155,7 +1179,6 @@ export function DrawingRaft({ L, B, mainDia, distDia, mainSp, distSp }) {
         stroke={DC.outline}
         strokeWidth="2.5"
       />
-      {/* Bottom mat - red */}
       {dBars.map((y, i) => (
         <line
           key={`db${i}`}
@@ -1180,7 +1203,6 @@ export function DrawingRaft({ L, B, mainDia, distDia, mainSp, distSp }) {
           opacity="0.7"
         />
       ))}
-      {/* Top mat - dashed overlay */}
       {dBars.map((y, i) => (
         <line
           key={`dt${i}`}
@@ -1278,7 +1300,6 @@ export function DrawingPileCap({
   const np = +nPiles || 4,
     pd = Math.max(8, Math.min(20, (+pileDia || 300) / 30));
 
-  // Pile positions
   let pilePos = [];
   if (np === 4)
     pilePos = [
@@ -1343,7 +1364,6 @@ export function DrawingPileCap({
           strokeWidth="1.2"
         />
       ))}
-      {/* Piles */}
       {pilePos.map((p, i) => (
         <g key={i}>
           <circle

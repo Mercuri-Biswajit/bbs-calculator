@@ -17,7 +17,7 @@ import {
   generateLapSpliceSchedule,
   BAR_WEIGHT,
 } from "../utils/calculations.js";
-import { TABS } from "./CalculatorPage.jsx";
+import { TABS } from "../App.jsx";
 
 export default function ResultPage({
   result,

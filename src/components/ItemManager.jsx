@@ -1,7 +1,7 @@
 // src/components/ItemManager.jsx
 // ALL dimensions in METRES. ALL spacings in mm.
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, Field, DiaSelect, Button, Badge } from "./ui.jsx";
 import {
   DrawingFooting,
@@ -714,7 +714,25 @@ const TYPE_ICONS = {
 function ItemCard({ item, type, onChange, onRemove, index }) {
   const [showDrawing, setShowDrawing] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
+  const fileInputRef = React.useRef(null);
   const Form = getForm(type);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      onChange("blueprintImage", event.target.result);
+    };
+    reader.readAsDataURL(file);
+    // Reset input so the same file could be selected again if needed
+    e.target.value = null;
+  };
+
+  const removeImage = () => {
+    onChange("blueprintImage", null);
+  };
 
   return (
     <Card className="item-card fade-in">
@@ -770,10 +788,65 @@ function ItemCard({ item, type, onChange, onRemove, index }) {
           </div>
           {showDrawing && (
             <div className="item-card__drawing-panel">
-              <div className="item-card__drawing-label">
-                📐 Live Blueprint Preview
+              <div className="item-card__drawing-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span>📐 Live Blueprint Preview</span>
+
+                {/* Hidden file input */}
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  style={{ display: "none" }}
+                />
+
+                <button
+                  className="btn btn--secondary btn--sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{ fontSize: 10, padding: "4px 8px" }}
+                >
+                  {item.blueprintImage ? "📷 Change Photo" : "📷 Upload Photo"}
+                </button>
               </div>
-              {getDrawing(type, item)}
+
+              {item.blueprintImage ? (
+                <div style={{ position: "relative", marginTop: 8 }}>
+                  <img
+                    src={item.blueprintImage}
+                    alt="Uploaded Blueprint"
+                    style={{
+                      width: "100%",
+                      maxHeight: "350px",
+                      objectFit: "contain",
+                      borderRadius: "8px",
+                      border: "1px solid var(--border-2)",
+                      background: "rgba(0,0,0,0.02)"
+                    }}
+                  />
+                  <button
+                    onClick={removeImage}
+                    className="btn btn--danger"
+                    style={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      width: 28,
+                      height: 28,
+                      padding: 0,
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
+                    }}
+                    title="Remove custom photo"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                getDrawing(type, item)
+              )}
             </div>
           )}
         </div>
@@ -783,7 +856,7 @@ function ItemCard({ item, type, onChange, onRemove, index }) {
 }
 
 // ─── ITEM MANAGER ─────────────────────────────────────────────────────────────
-export function ItemManager({ type, items, setItems }) {
+export function ItemManager({ type, items, setItems, elementConfig }) {
   const addItem = () => {
     const n = items.length + 1;
     const prefixes = {
@@ -832,6 +905,7 @@ export function ItemManager({ type, items, setItems }) {
     raft: "Raft Foundation",
     pileCap: "Pile Caps",
   };
+
 
   return (
     <div>

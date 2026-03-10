@@ -18,6 +18,8 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/plus-jakarta-sans": "^5.2.8",
     "@vitejs/plugin-react": "^4.3.1",
     "vite": "^7.3.1"
   }

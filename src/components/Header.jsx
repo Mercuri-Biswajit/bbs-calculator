@@ -7,10 +7,17 @@ export default function Header({
   projectReady,
   onViewHistory,
   showHistoryButton = true,
+  onHome,
 }) {
   return (
     <header className="header site-header">
-      <img src={logo} alt="Logo" className="header__logo-img" />
+      <img
+        src={logo}
+        alt="Logo"
+        className="header__logo-img"
+        onClick={onHome}
+        style={{ cursor: onHome ? "pointer" : "default" }}
+      />
 
       <nav className="hdr-nav" style={{ alignItems: "center", gap: 4 }}>
         <span className="hdr-nav__pill">Bar Bending Schedule</span>

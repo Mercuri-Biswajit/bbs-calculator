@@ -48,12 +48,27 @@ function calcItems(type, items) {
 }
 
 // ─── App ──────────────────────────────────────────────────────────────────────
+import Sidebar from "./components/Sidebar.jsx";
+
+export const TABS = [
+  { id: "footing", icon: "🏗", label: "Footings", color: "#d97706" },
+  { id: "column", icon: "🏛", label: "Columns", color: "#1e5cb8" },
+  { id: "plinthBeam", icon: "🔩", label: "Plinth Beams", color: "#059669" },
+  { id: "wallBeam", icon: "⚙️", label: "Wall Beams", color: "#7c3aed" },
+  { id: "slab", icon: "▦", label: "Slabs", color: "#dc2626" },
+  { id: "staircase", icon: "🪜", label: "Staircases", color: "#0d9488" },
+  { id: "lintel", icon: "🪟", label: "Lintel/Chajja", color: "#b45309" },
+  { id: "raft", icon: "🟫", label: "Raft", color: "#4338ca" },
+  { id: "pileCap", icon: "🔵", label: "Pile Cap", color: "#0369a1" },
+];
+
 export default function App() {
   const [viewMode, setViewMode] = useState("calculator"); // "calculator" | "result" | "history"
   const [details, setDetails] = useState(DEFAULT_PROJECT);
   const [rates, setRates] = useState({ ...DEFAULT_RATES_PER_PIECE });
   const [result, setResult] = useState(null);
   const [saveError, setSaveError] = useState(null);
+  const [activeTab, setActiveTab] = useState("footing"); // Lifted from CalculatorPage
 
   // ─── Element state ─────────────────────────────────────────────────────────
   const [footings, setFootings] = useState([
@@ -104,6 +119,10 @@ export default function App() {
   const projectReady = details.projectName.trim().length > 0;
   const updateRate = (dia, val) => setRates((p) => ({ ...p, [dia]: val }));
 
+  const totalNos = Object.values(elementSets)
+    .flatMap((s) => s.items)
+    .reduce((sum, it) => sum + (+it.count || 1), 0);
+
   // ─── Actions ────────────────────────────────────────────────────────────────
   const handleCalculate = useCallback(() => {
     const byType = allItemsByType.map(({ type, items }) => ({
@@ -117,10 +136,20 @@ export default function App() {
 
     setResult(data);
 
+    // Strip out heavy base64 image payloads before saving to history to prevent QuotaExceeded errors
+    const sanitizedByType = byType.map(t => ({
+      ...t,
+      items: t.items.map(item => {
+        const itemCopy = { ...item };
+        delete itemCopy.blueprintImage;
+        return itemCopy;
+      })
+    }));
+
     // FIX #7 — saveReport is now async (uses window.storage); handle the promise
     saveReport({
       details: { ...details },
-      byType,
+      byType: sanitizedByType,
       allRows,
       costs,
       rates: { ...rates },
@@ -151,7 +180,6 @@ export default function App() {
   ]);
 
   // FIX #8 — handleRecalculate: recalculates BBS+costs with current rates
-  // so that editing rates on ResultPage produces a fully consistent result.
   const handleRecalculate = useCallback(
     (newRates) => {
       const byType = allItemsByType.map(({ type, items }) => ({
@@ -204,73 +232,93 @@ export default function App() {
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: "100vh" }}>
-      <Header
-        onGenerateReport={handleCalculate}
-        projectReady={projectReady}
-        onViewHistory={() => setViewMode("history")}
-        showHistoryButton={viewMode !== "history"}
-      />
+    <div className="app-container">
+      {viewMode === "calculator" && (
+        <Sidebar
+          tabs={TABS}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          elementSets={elementSets}
+          totalNos={totalNos}
+        />
+      )}
 
-      {/* Storage error banner */}
-      {saveError && (
-        <div
-          style={{
-            background: "#fffbeb",
-            borderBottom: "1px solid #fde68a",
-            padding: "10px 28px",
-            fontSize: 12,
-            color: "#92400e",
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
+      <main className="main-content">
+        <Header
+          onGenerateReport={handleCalculate}
+          projectReady={projectReady}
+          onViewHistory={() => setViewMode("history")}
+          showHistoryButton={viewMode !== "history"}
+          onHome={() => {
+            setViewMode("calculator");
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }}
-        >
-          <span>{saveError}</span>
-          <button
-            onClick={() => setSaveError(null)}
+        />
+
+        {/* Storage error banner */}
+        {saveError && (
+          <div
             style={{
-              marginLeft: "auto",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
+              background: "#fffbeb",
+              borderBottom: "1px solid #fde68a",
+              padding: "10px 28px",
+              fontSize: 12,
               color: "#92400e",
-              fontSize: 16,
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
             }}
           >
-            ✕
-          </button>
+            <span>{saveError}</span>
+            <button
+              onClick={() => setSaveError(null)}
+              style={{
+                marginLeft: "auto",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#92400e",
+                fontSize: 16,
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        <div className="content-scrollable">
+          {viewMode === "history" && (
+            <HistoryPage
+              onLoadReport={handleLoadReport}
+              onClose={() => setViewMode("calculator")}
+            />
+          )}
+
+          {viewMode === "result" && result && (
+            <ResultPage
+              result={result}
+              rates={rates}
+              details={details}
+              onRateChange={handleRateChange}
+              onBack={() => setViewMode("calculator")}
+            />
+          )}
+
+          {viewMode === "calculator" && (
+            <CalculatorPage
+              details={details}
+              setDetails={setDetails}
+              rates={rates}
+              updateRate={updateRate}
+              elementSets={elementSets}
+              projectReady={projectReady}
+              onCalculate={handleCalculate}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
+          )}
         </div>
-      )}
-
-      {viewMode === "history" && (
-        <HistoryPage
-          onLoadReport={handleLoadReport}
-          onClose={() => setViewMode("calculator")}
-        />
-      )}
-
-      {viewMode === "result" && result && (
-        <ResultPage
-          result={result}
-          rates={rates}
-          details={details}
-          onRateChange={handleRateChange}
-          onBack={() => setViewMode("calculator")}
-        />
-      )}
-
-      {viewMode === "calculator" && (
-        <CalculatorPage
-          details={details}
-          setDetails={setDetails}
-          rates={rates}
-          updateRate={updateRate}
-          elementSets={elementSets}
-          projectReady={projectReady}
-          onCalculate={handleCalculate}
-        />
-      )}
+      </main>
     </div>
   );
 }

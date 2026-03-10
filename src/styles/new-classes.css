@@ -126,7 +126,7 @@
 
 .btn--excel:hover {
   background: #155c36;
-  box-shadow: 0 4px 14px rgba(29, 111, 66, .3);
+  box-shadow: 0 4px 14px rgba(29, 111, 66, 0.3);
 }
 
 .btn--excel:disabled {
@@ -154,7 +154,7 @@
 
 .cut-section-hdr__unit {
   font-size: 11px;
-  color: rgba(255, 255, 255, .5);
+  color: rgba(255, 255, 255, 0.5);
   font-family: var(--font-mono);
 }
 
@@ -176,7 +176,7 @@
 
 .cut-section-hdr__rods {
   font-size: 11px;
-  background: rgba(255, 255, 255, .15);
+  background: rgba(255, 255, 255, 0.15);
   padding: 3px 10px;
   border-radius: 4px;
   font-family: var(--font-mono);
@@ -248,7 +248,7 @@
 .grand-total-bar__label {
   font-weight: 700;
   font-size: 13px;
-  color: rgba(255, 255, 255, .7);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .grand-total-bar__len {
@@ -378,7 +378,6 @@
 }
 
 @media (max-width: 900px) {
-
   .proj-row-fields--row1,
   .proj-row-fields--row2 {
     grid-template-columns: 1fr 1fr;
@@ -386,7 +385,6 @@
 }
 
 @media (max-width: 560px) {
-
   .proj-row-fields--row1,
   .proj-row-fields--row2 {
     grid-template-columns: 1fr;
@@ -461,19 +459,24 @@
 
 /* ── Result page layout ── */
 .result-page {
-  min-height: 100vh;
-  background: var(--bg);
+  /* removed min-height to flex with container */
+  background: transparent;
 }
 
 .result-page__body {
-  max-width: 1400px;
+  width: 100%;
   margin: 0 auto;
   padding-top: 28px;
   padding-bottom: 48px;
 }
 
+.result-banner {
+  border-radius: var(--radius-lg);
+  margin-bottom: 24px;
+}
+
 .result-banner__inner {
-  max-width: 1400px;
+  width: 100%;
   margin: 0 auto;
   position: relative;
   z-index: 1;
@@ -488,20 +491,20 @@
 }
 
 .result-banner__project {
-  color: rgba(255, 255, 255, .9);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 14px;
   font-weight: 700;
   font-family: var(--font-display);
 }
 
 .result-banner__client {
-  color: rgba(255, 255, 255, .55);
+  color: rgba(255, 255, 255, 0.55);
   font-size: 12px;
   font-family: var(--font-mono);
 }
 
 .result-banner__location {
-  color: rgba(255, 255, 255, .45);
+  color: rgba(255, 255, 255, 0.45);
   font-size: 12px;
   font-family: var(--font-mono);
 }
@@ -513,23 +516,23 @@
 /* ── Glass button variant (used in dark banner) ── */
 .btn--glass {
   color: #fff !important;
-  background: rgba(255, 255, 255, .15) !important;
-  border: 1px solid rgba(255, 255, 255, .3) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
   backdrop-filter: blur(6px);
 }
 
 .btn--glass:hover {
-  background: rgba(255, 255, 255, .25) !important;
+  background: rgba(255, 255, 255, 0.25) !important;
 }
 
 .btn--glass-dark {
-  background: rgba(255, 255, 255, .12);
-  border: 1px solid rgba(255, 255, 255, .25);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: #fff;
 }
 
 .btn--glass-dark:hover {
-  background: rgba(255, 255, 255, .2);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* ── Section total weight (card header right side) ── */
@@ -581,7 +584,6 @@
   padding-bottom: 24px;
 }
 
-
 /* ── ADD THIS TO BOTTOM OF src/styles/new-classes.css ── */
 
 /* ── Stub Column / Pedestal Feature Panel ── */
@@ -620,7 +622,7 @@
   border-radius: var(--radius-sm);
   padding: 8px 12px;
   margin-top: 4px;
-  grid-column: 1 / -1;   /* span full width in form-grid */
+  grid-column: 1 / -1; /* span full width in form-grid */
 }
 
 .stub-calc-preview__label {

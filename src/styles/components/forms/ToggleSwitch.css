@@ -1,0 +1,60 @@
+/* src/styles/components/forms/ToggleSwitch.css */
+
+/* ── Toggle Switches ── */
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.toggle-switch:hover {
+  background: var(--surface-3);
+  border-color: var(--border-2);
+}
+
+.toggle-switch__label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-2);
+  letter-spacing: 0.3px;
+  font-family: var(--font-display);
+}
+
+.toggle-switch__input {
+  display: none;
+}
+
+.toggle-switch__track {
+  width: 38px;
+  height: 20px;
+  background: var(--border-2);
+  border-radius: 99px;
+  position: relative;
+  transition: background var(--transition-fast);
+}
+
+.toggle-switch__thumb {
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: var(--shadow-sm);
+}
+
+.toggle-switch__input:checked + .toggle-switch__track {
+  background: var(--primary);
+}
+
+.toggle-switch__input:checked + .toggle-switch__track .toggle-switch__thumb {
+  transform: translateX(18px);
+}

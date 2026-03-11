@@ -9,12 +9,18 @@ import { downloadPDF } from "../utils/pdfReport.js";
 
 const STORAGE_KEY = "bbs_saved_reports";
 
-// ─── Storage helpers using window.storage API ────────────────────────────────
+// ─── Storage helpers using standard localStorage API ──────────────────────────
 
 async function getSavedReports() {
   try {
-    const result = await window.storage.get(STORAGE_KEY);
-    return result ? JSON.parse(result.value) : [];
+    let result = null;
+    if (window.storage && window.storage.get) {
+      const res = await window.storage.get(STORAGE_KEY);
+      result = res ? res.value : null;
+    } else {
+      result = localStorage.getItem(STORAGE_KEY);
+    }
+    return result ? JSON.parse(result) : [];
   } catch {
     return [];
   }
@@ -22,7 +28,12 @@ async function getSavedReports() {
 
 async function persistReports(reports) {
   try {
-    await window.storage.set(STORAGE_KEY, JSON.stringify(reports));
+    const dataString = JSON.stringify(reports);
+    if (window.storage && window.storage.set) {
+      await window.storage.set(STORAGE_KEY, dataString);
+    } else {
+      localStorage.setItem(STORAGE_KEY, dataString);
+    }
     return { ok: true };
   } catch (error) {
     console.error("Storage error:", error);
@@ -65,7 +76,11 @@ export async function deleteReport(id) {
 
 export async function clearAllReports() {
   try {
-    await window.storage.delete(STORAGE_KEY);
+    if (window.storage && window.storage.delete) {
+      await window.storage.delete(STORAGE_KEY);
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
     return true;
   } catch {
     return false;
@@ -128,6 +143,7 @@ export default function ReportsHistory({ onLoadReport, onNewProject }) {
 
   return (
     <div
+      className="dashboard-page"
       style={{ minHeight: "100vh", background: "var(--bg)", paddingBottom: 48 }}
     >
       {/* Banner */}

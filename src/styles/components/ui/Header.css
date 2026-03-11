@@ -1,0 +1,40 @@
+/* src/styles/components/ui/Header.css */
+
+.header {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 0 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: var(--shadow-sm);
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .header {
+    padding: 0 16px !important;
+  }
+}
+
+.header__logo-img {
+  height: auto;
+  width: 90px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.hdr-nav {
+  display: flex;
+}
+
+@media (max-width: 640px) {
+  .hdr-nav {
+    display: none;
+  }
+}

@@ -2,8 +2,28 @@
 @import "./variables.css";
 @import "./base.css";
 @import "./layout.css";
-@import "./ui.css";
-@import "./forms.css";
-@import "./drawings.css";
-@import "./components.css";
-@import "./new-classes.css";
+
+/* UI Micro-Components */
+@import "./components/ui/Button.css";
+@import "./components/ui/Badge.css";
+@import "./components/ui/Card.css";
+@import "./components/ui/Header.css";
+
+/* Form Micro-Components */
+@import "./components/forms/Inputs.css";
+@import "./components/forms/ToggleSwitch.css";
+@import "./components/forms/ItemCardGrid.css";
+
+/* Drawing Component CSS */
+@import "./components/drawings/LapSpliceDiagram.css";
+@import "./components/drawings/BlueprintControls.css";
+
+/* Shared Components */
+@import "./components/Navigation.css";
+@import "./components/ItemCard.css";
+@import "./components/ProjectDetails.css";
+
+/* Pages */
+@import "./pages/CalculatorPage.css";
+@import "./pages/ResultPage.css";
+@import "./pages/ReportsHistory.css";

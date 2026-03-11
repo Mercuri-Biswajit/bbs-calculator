@@ -1,0 +1,44 @@
+/* src/styles/components/drawings/LapSpliceDiagram.css */
+
+/* ── Lap splice diagram box & SVG ── */
+.lapsplice-diagram {
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.lapsplice-diagram__title {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+}
+
+.lapsplice-svg {
+  width: 100%;
+  max-width: 600px;
+  display: block;
+}
+
+/* ── Zone badges in lap splice ── */
+.zone-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.zone-badge--tension {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.zone-badge--compression {
+  background: #eff6ff;
+  color: #1d4ed8;
+}

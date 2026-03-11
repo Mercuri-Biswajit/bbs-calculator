@@ -27,12 +27,6 @@ export default function CalculatorPage({
 
   return (
     <div className="calculator-layout fade-in">
-      {/* Project details at the top as a beautiful glass card */}
-      <ProjectDetails details={details} setDetails={setDetails} />
-
-      {/* Spacing between modules */}
-      <div style={{ height: 24 }} />
-
       {/* Active element manager wrapped in a glass container */}
       <div className="element-workspace">
         <ItemManager

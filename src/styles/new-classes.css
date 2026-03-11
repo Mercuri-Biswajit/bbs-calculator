@@ -1,23 +1,5 @@
 /* ─── NEW ELEMENT ADDITIONS ──────────────────────────────────────────────────── */
 
-/* ── Stirrup zone info banner (in BeamForm) ── */
-.stirrup-zone-info {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  margin-top: 8px;
-  font-size: 11px;
-  color: #1d4ed8;
-  font-family: var(--font-mono);
-}
-
-/* ── Optional feature toggle panels (Torsion, Chajja, Crank) ── */
-.feature-panel {
-  margin-top: 12px;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-}
 
 .feature-panel--torsion {
   background: #fdf4ff;
@@ -644,4 +626,89 @@
 .stub-calc-preview__value b {
   color: var(--primary-dark);
   font-size: 14px;
+}
+
+/* ── Full Page Project Details Form ── */
+.proj-full-card {
+  padding: 36px 42px;
+  background: var(--surface);
+}
+
+@media (max-width: 600px) {
+  .proj-full-card {
+    padding: 24px 20px;
+  }
+}
+
+.proj-full-header {
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--border-2);
+  padding-bottom: 20px;
+}
+
+.proj-full-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+  font-family: var(--font-display);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.proj-full-subtitle {
+  font-size: 13px;
+  color: var(--text-3);
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  line-height: 1.5;
+}
+
+.proj-full-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 640px) {
+  .proj-full-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.proj-full-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.proj-full-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+
+.proj-full-input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  transition: all var(--transition);
+  font-family: var(--font-mono);
+}
+
+.proj-full-input:focus {
+  border-color: var(--primary);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  outline: none;
 }

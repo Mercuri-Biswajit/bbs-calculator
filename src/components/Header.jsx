@@ -24,13 +24,6 @@ export default function Header({
       </nav>
 
       <div className="header__actions">
-        {showHistoryButton && onViewHistory && (
-          <button onClick={onViewHistory} className="btn btn--secondary btn--md" style={{ whiteSpace: "nowrap" }}>
-            <span>📚</span>
-            <span className="hdr-btn-full">Saved Reports</span>
-            <span className="hdr-btn-short">Saved</span>
-          </button>
-        )}
         <button
           onClick={onGenerateReport}
           className="btn btn--primary btn--md"

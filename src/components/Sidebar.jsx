@@ -18,7 +18,22 @@ export default function Sidebar({ tabs, activeTab, setActiveTab, elementSets, to
             </div>
 
             <div className="sidebar__nav">
-                <div className="sidebar__nav-title">Elements</div>
+                <button
+                    onClick={() => setActiveTab("dashboard")}
+                    className={`sidebar__nav-item ${activeTab === "dashboard" ? "active" : ""}`}
+                >
+                    <span className="sidebar__nav-icon">📊</span>
+                    <span className="sidebar__nav-label">Dashboard</span>
+                </button>
+                <button
+                    onClick={() => setActiveTab("project_details")}
+                    className={`sidebar__nav-item ${activeTab === "project_details" ? "active" : ""}`}
+                >
+                    <span className="sidebar__nav-icon">📋</span>
+                    <span className="sidebar__nav-label">Project Details</span>
+                </button>
+
+                <div className="sidebar__nav-title" style={{ marginTop: 16 }}>Elements</div>
 
                 {tabs.map((t) => {
                     const nos = elementSets[t.id].items.reduce(

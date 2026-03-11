@@ -11,8 +11,7 @@ import {
   DrawingStaircase,
   DrawingLintel,
   DrawingRaft,
-  DrawingPileCap,
-} from "../utils/drawings.jsx";
+} from "./drawings/index.js";
 
 export const DEFAULTS = {
   footing: {
@@ -788,65 +787,47 @@ function ItemCard({ item, type, onChange, onRemove, index }) {
           </div>
           {showDrawing && (
             <div className="item-card__drawing-panel">
-              <div className="item-card__drawing-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span>📐 Live Blueprint Preview</span>
-
-                {/* Hidden file input */}
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={fileInputRef}
-                  onChange={handleImageUpload}
-                  style={{ display: "none" }}
-                />
-
-                <button
-                  className="btn btn--secondary btn--sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{ fontSize: 10, padding: "4px 8px" }}
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  marginBottom: 16,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                  }}
                 >
-                  {item.blueprintImage ? "📷 Change Photo" : "📷 Upload Photo"}
-                </button>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: "var(--primary-dark)",
+                      textTransform: "uppercase",
+                      letterSpacing: "1.2px",
+                      fontFamily: "var(--font-mono)",
+                    }}
+                  >
+                    📐 Live Blueprint
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      color: "var(--text-3)",
+                      marginTop: 4,
+                    }}
+                  >
+                    Auto-calculated diagram
+                  </span>
+                </div>
               </div>
 
-              {item.blueprintImage ? (
-                <div style={{ position: "relative", marginTop: 8 }}>
-                  <img
-                    src={item.blueprintImage}
-                    alt="Uploaded Blueprint"
-                    style={{
-                      width: "100%",
-                      maxHeight: "350px",
-                      objectFit: "contain",
-                      borderRadius: "8px",
-                      border: "1px solid var(--border-2)",
-                      background: "rgba(0,0,0,0.02)"
-                    }}
-                  />
-                  <button
-                    onClick={removeImage}
-                    className="btn btn--danger"
-                    style={{
-                      position: "absolute",
-                      top: 8,
-                      right: 8,
-                      width: 28,
-                      height: 28,
-                      padding: 0,
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
-                    }}
-                    title="Remove custom photo"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ) : (
-                getDrawing(type, item)
-              )}
+              {getDrawing(type, item)}
             </div>
           )}
         </div>
@@ -905,7 +886,6 @@ export function ItemManager({ type, items, setItems, elementConfig }) {
     raft: "Raft Foundation",
     pileCap: "Pile Caps",
   };
-
 
   return (
     <div>

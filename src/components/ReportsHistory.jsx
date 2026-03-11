@@ -74,7 +74,7 @@ export async function clearAllReports() {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function ReportsHistory({ onLoadReport, onClose }) {
+export default function ReportsHistory({ onLoadReport, onNewProject }) {
   const [reports, setReports] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
@@ -148,15 +148,10 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
           }}
         >
           <button
-            onClick={onClose}
-            className="btn btn--secondary btn--sm"
-            style={{
-              color: "rgba(255,255,255,.85)",
-              borderColor: "rgba(255,255,255,.3)",
-              background: "rgba(255,255,255,.12)",
-            }}
+            onClick={onNewProject}
+            className="btn btn--primary btn--sm"
           >
-            ← Back to Calculator
+            + Create New Project
           </button>
           <div style={{ flex: 1 }}>
             <div
@@ -169,7 +164,7 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
                 letterSpacing: "-0.3px",
               }}
             >
-              📚 Saved Reports History
+              📚 Dashboard & Projects
             </div>
             <div
               style={{
@@ -254,8 +249,8 @@ export default function ReportsHistory({ onLoadReport, onClose }) {
               Generate your first BBS report and it will automatically be saved
               here.
             </div>
-            <button onClick={onClose} className="btn btn--primary btn--lg">
-              Go to Calculator
+            <button onClick={onNewProject} className="btn btn--primary btn--lg">
+              Start New Project
             </button>
           </div>
         )}

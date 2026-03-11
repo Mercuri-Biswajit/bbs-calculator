@@ -10,10 +10,10 @@
   --font-mono: "IBM Plex Mono", "Courier New", monospace;
 
   /* Theme Colors - Sleek & Modern */
-  --sidebar-bg: #090e17;
-  --sidebar-hover: rgba(255, 255, 255, 0.06);
-  --sidebar-active: rgba(59, 130, 246, 0.15);
-  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-bg: rgba(255, 255, 255, 0.85); /* Light glass background */
+  --sidebar-hover: rgba(59, 130, 246, 0.05); /* Very faint blue */
+  --sidebar-active: rgba(59, 130, 246, 0.12); /* Light blue */
+  --sidebar-border: rgba(0, 0, 0, 0.06); /* Faint gray border */
 
   /* Vivid Accents */
   --primary: #3b82f6; /* Blue 500 */

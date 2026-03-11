@@ -4,7 +4,7 @@
 import { useState, useCallback } from "react";
 import { DEFAULT_PROJECT } from "./components/ProjectDetails.jsx";
 import { newItem } from "./components/ItemManager.jsx";
-import { saveReport } from "./components/ReportsHistory.jsx";
+import ReportsHistory, { saveReport } from "./components/ReportsHistory.jsx";
 import {
   calcSingleFooting,
   calcSingleColumn,
@@ -23,7 +23,7 @@ import {
 import Header from "./components/Header.jsx";
 import CalculatorPage from "./pages/CalculatorPage.jsx";
 import ResultPage from "./pages/ResultPage.jsx";
-import HistoryPage from "./pages/HistoryPage.jsx";
+import ProjectDetails from "./components/ProjectDetails.jsx";
 
 // ─── helper ───────────────────────────────────────────────────────────────────
 function calcItems(type, items) {
@@ -68,7 +68,7 @@ export default function App() {
   const [rates, setRates] = useState({ ...DEFAULT_RATES_PER_PIECE });
   const [result, setResult] = useState(null);
   const [saveError, setSaveError] = useState(null);
-  const [activeTab, setActiveTab] = useState("footing"); // Lifted from CalculatorPage
+  const [activeTab, setActiveTab] = useState("dashboard"); // Default to dashboard
 
   // ─── Element state ─────────────────────────────────────────────────────────
   const [footings, setFootings] = useState([
@@ -247,10 +247,8 @@ export default function App() {
         <Header
           onGenerateReport={handleCalculate}
           projectReady={projectReady}
-          onViewHistory={() => setViewMode("history")}
-          showHistoryButton={viewMode !== "history"}
           onHome={() => {
-            setViewMode("calculator");
+            setActiveTab("dashboard");
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
         />
@@ -287,12 +285,7 @@ export default function App() {
         )}
 
         <div className="content-scrollable">
-          {viewMode === "history" && (
-            <HistoryPage
-              onLoadReport={handleLoadReport}
-              onClose={() => setViewMode("calculator")}
-            />
-          )}
+          {/* History Page is now Dashboard Tab */}
 
           {viewMode === "result" && result && (
             <ResultPage
@@ -304,7 +297,29 @@ export default function App() {
             />
           )}
 
-          {viewMode === "calculator" && (
+          {viewMode === "calculator" && activeTab === "dashboard" && (
+            <ReportsHistory
+              onLoadReport={handleLoadReport}
+              onNewProject={() => {
+                setDetails(DEFAULT_PROJECT); // Reset details for new project
+                setResult(null); // Clear previous result
+                setActiveTab("project_details");
+              }}
+            />
+          )}
+
+          {viewMode === "calculator" && activeTab === "project_details" && (
+            <div className="page-pad fade-in" style={{ maxWidth: 860, margin: "0 auto", marginTop: 40 }}>
+               <ProjectDetails 
+                 details={details} 
+                 setDetails={setDetails} 
+                 onStart={() => setActiveTab('footing')}
+                 projectReady={projectReady}
+               />
+            </div>
+          )}
+
+          {viewMode === "calculator" && activeTab !== "dashboard" && activeTab !== "project_details" && (
             <CalculatorPage
               details={details}
               setDetails={setDetails}

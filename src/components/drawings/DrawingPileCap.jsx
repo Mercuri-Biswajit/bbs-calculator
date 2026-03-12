@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { BlueprintSVG, DC, DimLine, RebarDot, Callout, Legend } from "./DrawingShared.jsx";
+import { motion, AnimatePresence } from "framer-motion";
+import { BlueprintSVG, DC, DimLine, RebarDot, Callout, Legend, scaleIn, popIn, staggerContainer } from "./DrawingShared.jsx";
+
+const viewTransition = {
+  initial: { opacity: 0, scale: 0.95, y: 10 },
+  animate: { opacity: 1, scale: 1, y: 0 },
+  exit: { opacity: 0, scale: 0.95, y: -10 },
+  transition: { type: "spring", stiffness: 200, damping: 22 },
+};
 
 export function DrawingPileCap({
   L,
@@ -90,6 +98,7 @@ export function DrawingPileCap({
     letterSpacing: 1,
     background: view === "plan" ? "#1e3a5f" : "#d6eaf8",
     color: view === "plan" ? "#fff" : "#1e6091",
+    transition: "all 0.3s ease",
   };
   const secBtn = {
     ...planBtn,
@@ -107,344 +116,391 @@ export function DrawingPileCap({
           ▧ Section A-A
         </button>
       </div>
-      {view === "plan" ? (
-        <BlueprintSVG
-          width={W}
-          height={H}
-          title={`PILE CAP — PLAN VIEW  |  Cover: 75mm  |  ${np} Piles φ${pileDia}mm`}
-        >
-          <rect
-            x={ox}
-            y={oy}
-            width={sw}
-            height={sh}
-            fill="url(#hatch)"
-            stroke={DC.outline}
-            strokeWidth="2"
-          />
-          {mBars.map((y, i) => (
-            <line
-              key={`m${i}`}
-              x1={ox}
-              y1={oy + y}
-              x2={ox + sw}
-              y2={oy + y}
-              stroke={DC.main}
-              strokeWidth="1.4"
-            />
-          ))}
-          {dBars.map((x, i) => (
-            <line
-              key={`d${i}`}
-              x1={ox + x}
-              y1={oy}
-              x2={ox + x}
-              y2={oy + sh}
-              stroke={DC.dist}
-              strokeWidth="1.2"
-            />
-          ))}
-          {pilePos.map((p, i) => (
-            <g key={i}>
-              <circle
-                cx={p[0]}
-                cy={p[1]}
-                r={pd}
-                fill="#cbd5e1"
-                stroke="#475569"
+      <AnimatePresence mode="wait">
+        {view === "plan" ? (
+          <motion.div key="plan" {...viewTransition}>
+            <BlueprintSVG
+              width={W}
+              height={H}
+              title={`PILE CAP — PLAN VIEW  |  Cover: 75mm  |  ${np} Piles φ${pileDia}mm`}
+            >
+              {/* Cap body */}
+              <motion.rect
+                x={ox}
+                y={oy}
+                width={sw}
+                height={sh}
+                fill="url(#hatch)"
+                stroke={DC.outline}
+                strokeWidth="2"
+                variants={scaleIn}
+                style={{ transformOrigin: `${ox + sw / 2}px ${oy + sh / 2}px` }}
+              />
+              {/* Main bars */}
+              {mBars.map((y, i) => (
+                <motion.line
+                  key={`m${i}`}
+                  x1={ox}
+                  y1={oy + y}
+                  x2={ox + sw}
+                  y2={oy + y}
+                  stroke={DC.main}
+                  strokeWidth="1.4"
+                  className="rebar-line-hover"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 0.35, delay: 0.25 + i * 0.04 }}
+                />
+              ))}
+              {/* Dist bars */}
+              {dBars.map((x, i) => (
+                <motion.line
+                  key={`d${i}`}
+                  x1={ox + x}
+                  y1={oy}
+                  x2={ox + x}
+                  y2={oy + sh}
+                  stroke={DC.dist}
+                  strokeWidth="1.2"
+                  className="rebar-line-hover"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 0.35, delay: 0.3 + i * 0.04 }}
+                />
+              ))}
+              {/* Piles — bounce in */}
+              {pilePos.map((p, i) => (
+                <motion.g
+                  key={i}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 12,
+                    delay: 0.5 + i * 0.1,
+                  }}
+                  style={{ transformOrigin: `${p[0]}px ${p[1]}px` }}
+                  whileHover={{ scale: 1.15 }}
+                >
+                  <circle
+                    cx={p[0]}
+                    cy={p[1]}
+                    r={pd}
+                    fill="#cbd5e1"
+                    stroke="#475569"
+                    strokeWidth="1.5"
+                    opacity="0.85"
+                  />
+                  <text
+                    x={p[0]}
+                    y={p[1] + 3}
+                    textAnchor="middle"
+                    fill="#1e293b"
+                    style={{
+                      fontSize: 11,
+                      fontFamily: "monospace",
+                      fontWeight: 700,
+                    }}
+                  >
+                    P{i + 1}
+                  </text>
+                </motion.g>
+              ))}
+              <DimLine
+                x1={ox}
+                y1={oy + sh}
+                x2={ox + sw}
+                y2={oy + sh}
+                label={`${l}m`}
+                offset={20}
+              />
+              <DimLine
+                x1={ox}
+                y1={oy}
+                x2={ox}
+                y2={oy + sh}
+                label={`${b}m`}
+                offset={-20}
+                vertical
+              />
+              <text
+                x={ox + sw / 2}
+                y={oy + sh / 2 + 5}
+                textAnchor="middle"
+                fill={DC.outline}
+                className="watermark-text"
+                style={{
+                  fontSize: 14,
+                  fontFamily: "monospace",
+                  fontWeight: 900,
+                  letterSpacing: 3,
+                  opacity: 0,
+                }}
+              >
+                PILE CAP PLAN
+              </text>
+              <Callout
+                px={ox + sw * 0.35}
+                py={oy + sp * 0.4}
+                lx={ox + sw * 0.35}
+                ly={oy - 17}
+                label={`Main Bar φ${mainDia}mm @ ${spacing}mm c/c`}
+                anchor="middle"
+                color={DC.main}
+              />
+              <Callout
+                px={ox + sp * 0.4}
+                py={oy + sh * 0.35}
+                lx={ox - 12}
+                ly={oy + sh * 0.35}
+                label={`Dist Bar φ${distDia}mm @ ${spacing}mm c/c`}
+                anchor="end"
+                color={DC.dist}
+              />
+              <Callout
+                px={ox + sw + 4}
+                py={oy + sh * 0.65}
+                lx={ox + sw + 14}
+                ly={oy + sh * 0.65}
+                label={`Pile φ${pileDia}mm × ${np} nos`}
+                anchor="start"
+                color="#475569"
+              />
+              <Callout
+                px={ox + 4}
+                py={oy + 4}
+                lx={ox - 10}
+                ly={oy + 22}
+                label="Cover = 75 mm"
+                anchor="end"
+                color="#64748b"
+              />
+              <Legend
+                x={W - 130}
+                y={oy}
+                items={[
+                  { color: DC.main, label: `Main φ${mainDia}@${spacing}`, type: "line" },
+                  { color: DC.dist, label: `Dist φ${distDia}@${spacing}`, type: "line" },
+                  { color: "#475569", label: `Piles ×${np}`, type: "circle" },
+                ]}
+              />
+            </BlueprintSVG>
+          </motion.div>
+        ) : (
+          <motion.div key="section" {...viewTransition}>
+            <BlueprintSVG
+              width={W}
+              height={H}
+              title={`PILE CAP — SECTION A-A  |  D=${d}m  |  ${np} Piles φ${pileDia}mm`}
+            >
+              {/* Pile stems — drop down */}
+              {pilePosX.map((x, i) => (
+                <motion.g
+                  key={i}
+                  initial={{ y: -pileStemH, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 200, delay: 0.2 + i * 0.1 }}
+                >
+                  <rect
+                    x={x - ppd}
+                    y={psy + psh}
+                    width={ppd * 2}
+                    height={pileStemH}
+                    fill="#94a3b8"
+                    stroke="#475569"
+                    strokeWidth="1"
+                    opacity="0.8"
+                  />
+                  <text
+                    x={x}
+                    y={psy + psh + pileStemH / 2 + 3}
+                    textAnchor="middle"
+                    fill="#1e293b"
+                    style={{
+                      fontSize: 10,
+                      fontFamily: "monospace",
+                      fontWeight: 700,
+                    }}
+                  >
+                    P{i + 1}
+                  </text>
+                </motion.g>
+              ))}
+              {/* Soil below piles */}
+              <motion.rect
+                x={psx - 10}
+                y={psy + psh + pileStemH}
+                width={psw + 20}
+                height={14}
+                fill="#c8a86f"
+                className="soil-wave"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.2 }}
+                transition={{ delay: 0.3 }}
+              />
+              {/* Pile cap body */}
+              <motion.rect
+                x={psx}
+                y={psy}
+                width={psw}
+                height={psh}
+                fill="url(#hatch)"
+                stroke={DC.outline}
+                strokeWidth="2"
+                variants={scaleIn}
+                style={{ transformOrigin: `${psx + psw / 2}px ${psy + psh}px` }}
+              />
+              {/* Cover zone */}
+              <motion.rect
+                x={psx + pcov}
+                y={psy + pcov}
+                width={psw - 2 * pcov}
+                height={psh - 2 * pcov}
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="0.7"
+                strokeDasharray="4,2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+              />
+              {/* Main bars at bottom */}
+              <motion.line
+                x1={psx + pcov}
+                y1={psy + psh - pcov}
+                x2={psx + psw - pcov}
+                y2={psy + psh - pcov}
+                stroke={DC.main}
+                strokeWidth="2.5"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 0.9 }}
+                transition={{ duration: 0.6, delay: 0.45 }}
+              />
+              {/* Dist bar dots */}
+              <motion.g variants={staggerContainer} initial="hidden" animate="visible">
+                {[0.2, 0.5, 0.8].map((t, i) => (
+                  <RebarDot
+                    key={i}
+                    cx={psx + t * psw}
+                    cy={psy + psh - pcov}
+                    dia={+distDia}
+                    color={DC.dist}
+                  />
+                ))}
+              </motion.g>
+              {/* Top bars */}
+              <motion.line
+                x1={psx + pcov}
+                y1={psy + pcov}
+                x2={psx + psw - pcov}
+                y2={psy + pcov}
+                stroke={DC.main}
                 strokeWidth="1.5"
-                opacity="0.85"
+                strokeDasharray="8,3"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 0.7 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+              />
+              {/* Anchor dowels — extend upward */}
+              {pilePosX.map((x, i) => (
+                <motion.line
+                  key={i}
+                  x1={x}
+                  y1={psy + psh}
+                  x2={x}
+                  y2={psy + pcov + 5}
+                  stroke="#f59e0b"
+                  strokeWidth="1.5"
+                  strokeDasharray="3,2"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 0.8 }}
+                  transition={{ duration: 0.5, delay: 0.6 + i * 0.08 }}
+                />
+              ))}
+              {/* Dimensions */}
+              <DimLine
+                x1={psx}
+                y1={psy + psh}
+                x2={psx + psw}
+                y2={psy + psh}
+                label={`L=${l}m`}
+                offset={pileStemH + 20}
+              />
+              <DimLine
+                x1={psx}
+                y1={psy}
+                x2={psx}
+                y2={psy + psh}
+                label={`D=${d}m`}
+                offset={-22}
+                vertical
               />
               <text
-                x={p[0]}
-                y={p[1] + 3}
+                x={psx + psw / 2}
+                y={psy + psh / 2 + 4}
                 textAnchor="middle"
-                fill="#1e293b"
+                fill={DC.outline}
+                className="watermark-text"
                 style={{
-                  fontSize: 11,
+                  fontSize: 13,
                   fontFamily: "monospace",
-                  fontWeight: 700,
+                  fontWeight: 900,
+                  letterSpacing: 3,
+                  opacity: 0,
                 }}
               >
-                P{i + 1}
+                PILE CAP SECTION
               </text>
-            </g>
-          ))}
-          <DimLine
-            x1={ox}
-            y1={oy + sh}
-            x2={ox + sw}
-            y2={oy + sh}
-            label={`${l}m`}
-            offset={20}
-          />
-          <DimLine
-            x1={ox}
-            y1={oy}
-            x2={ox}
-            y2={oy + sh}
-            label={`${b}m`}
-            offset={-20}
-            vertical
-          />
-          <text
-            x={ox + sw / 2}
-            y={oy + sh / 2 + 5}
-            textAnchor="middle"
-            fill={DC.outline}
-            opacity={0.09}
-            style={{
-              fontSize: 14,
-              fontFamily: "monospace",
-              fontWeight: 900,
-              letterSpacing: 3,
-            }}
-          >
-            PILE CAP PLAN
-          </text>
-          <Callout
-            px={ox + sw * 0.35}
-            py={oy + sp * 0.4}
-            lx={ox + sw * 0.35}
-            ly={oy - 17}
-            label={`Main Bar φ${mainDia}mm @ ${spacing}mm c/c`}
-            anchor="middle"
-            color={DC.main}
-          />
-          <Callout
-            px={ox + sp * 0.4}
-            py={oy + sh * 0.35}
-            lx={ox - 12}
-            ly={oy + sh * 0.35}
-            label={`Dist Bar φ${distDia}mm @ ${spacing}mm c/c`}
-            anchor="end"
-            color={DC.dist}
-          />
-          <Callout
-            px={ox + sw + 4}
-            py={oy + sh * 0.65}
-            lx={ox + sw + 14}
-            ly={oy + sh * 0.65}
-            label={`Pile φ${pileDia}mm × ${np} nos`}
-            anchor="start"
-            color="#475569"
-          />
-          <Callout
-            px={ox + 4}
-            py={oy + 4}
-            lx={ox - 10}
-            ly={oy + 22}
-            label="Cover = 75 mm"
-            anchor="end"
-            color="#64748b"
-          />
-          <Legend
-            x={W - 130}
-            y={oy}
-            items={[
-              {
-                color: DC.main,
-                label: `Main φ${mainDia}@${spacing}`,
-                type: "line",
-              },
-              {
-                color: DC.dist,
-                label: `Dist φ${distDia}@${spacing}`,
-                type: "line",
-              },
-              { color: "#475569", label: `Piles ×${np}`, type: "circle" },
-            ]}
-          />
-        </BlueprintSVG>
-      ) : (
-        <BlueprintSVG
-          width={W}
-          height={H}
-          title={`PILE CAP — SECTION A-A  |  D=${d}m  |  ${np} Piles φ${pileDia}mm`}
-        >
-          {/* Pile stems below cap */}
-          {pilePosX.map((x, i) => (
-            <g key={i}>
-              <rect
-                x={x - ppd}
-                y={psy + psh}
-                width={ppd * 2}
-                height={pileStemH}
-                fill="#94a3b8"
-                stroke="#475569"
-                strokeWidth="1"
-                opacity="0.8"
+              <Callout
+                px={psx + pcov + 20}
+                py={psy + psh - pcov}
+                lx={psx - 12}
+                ly={psy + psh * 0.8}
+                label={`Main Bar φ${mainDia}mm (bot)`}
+                anchor="end"
+                color={DC.main}
               />
-              <text
-                x={x}
-                y={psy + psh + pileStemH / 2 + 3}
-                textAnchor="middle"
-                fill="#1e293b"
-                style={{
-                  fontSize: 10,
-                  fontFamily: "monospace",
-                  fontWeight: 700,
-                }}
-              >
-                P{i + 1}
-              </text>
-            </g>
-          ))}
-          {/* Soil below piles */}
-          <rect
-            x={psx - 10}
-            y={psy + psh + pileStemH}
-            width={psw + 20}
-            height={14}
-            fill="#c8a86f"
-            opacity="0.2"
-          />
-          {/* Pile cap body */}
-          <rect
-            x={psx}
-            y={psy}
-            width={psw}
-            height={psh}
-            fill="url(#hatch)"
-            stroke={DC.outline}
-            strokeWidth="2"
-          />
-          {/* Cover zone */}
-          <rect
-            x={psx + pcov}
-            y={psy + pcov}
-            width={psw - 2 * pcov}
-            height={psh - 2 * pcov}
-            fill="none"
-            stroke="#94a3b8"
-            strokeWidth="0.7"
-            strokeDasharray="4,2"
-          />
-          {/* Main bars at bottom */}
-          <line
-            x1={psx + pcov}
-            y1={psy + psh - pcov}
-            x2={psx + psw - pcov}
-            y2={psy + psh - pcov}
-            stroke={DC.main}
-            strokeWidth="2.5"
-            opacity="0.9"
-          />
-          {/* Dist bar dots */}
-          {[0.2, 0.5, 0.8].map((t, i) => (
-            <RebarDot
-              key={i}
-              cx={psx + t * psw}
-              cy={psy + psh - pcov}
-              dia={+distDia}
-              color={DC.dist}
-            />
-          ))}
-          {/* Top bars */}
-          <line
-            x1={psx + pcov}
-            y1={psy + pcov}
-            x2={psx + psw - pcov}
-            y2={psy + pcov}
-            stroke={DC.main}
-            strokeWidth="1.5"
-            strokeDasharray="8,3"
-            opacity="0.7"
-          />
-          {/* Anchor dowels from piles */}
-          {pilePosX.map((x, i) => (
-            <line
-              key={i}
-              x1={x}
-              y1={psy + psh}
-              x2={x}
-              y2={psy + pcov + 5}
-              stroke="#f59e0b"
-              strokeWidth="1.5"
-              strokeDasharray="3,2"
-              opacity="0.8"
-            />
-          ))}
-          {/* Dimensions */}
-          <DimLine
-            x1={psx}
-            y1={psy + psh}
-            x2={psx + psw}
-            y2={psy + psh}
-            label={`L=${l}m`}
-            offset={pileStemH + 20}
-          />
-          <DimLine
-            x1={psx}
-            y1={psy}
-            x2={psx}
-            y2={psy + psh}
-            label={`D=${d}m`}
-            offset={-22}
-            vertical
-          />
-          <text
-            x={psx + psw / 2}
-            y={psy + psh / 2 + 4}
-            textAnchor="middle"
-            fill={DC.outline}
-            opacity={0.1}
-            style={{
-              fontSize: 13,
-              fontFamily: "monospace",
-              fontWeight: 900,
-              letterSpacing: 3,
-            }}
-          >
-            PILE CAP SECTION
-          </text>
-          <Callout
-            px={psx + pcov + 20}
-            py={psy + psh - pcov}
-            lx={psx - 12}
-            ly={psy + psh * 0.8}
-            label={`Main Bar φ${mainDia}mm (bot)`}
-            anchor="end"
-            color={DC.main}
-          />
-          <Callout
-            px={pilePosX[0]}
-            py={psy + psh - psh / 3}
-            lx={psx - 12}
-            ly={psy + psh * 0.4}
-            label={`Anchor Dowel (pile)`}
-            anchor="end"
-            color="#f59e0b"
-          />
-          <Callout
-            px={psx + pcov}
-            py={psy + psh / 2}
-            lx={psx + psw + 14}
-            ly={psy + psh * 0.5}
-            label="Cover = 75 mm"
-            anchor="start"
-            color="#64748b"
-          />
-          <Callout
-            px={pilePosX[0]}
-            py={psy + psh + pileStemH / 2}
-            lx={psx + psw + 14}
-            ly={psy + psh + 15}
-            label={`Pile φ${pileDia}mm × ${np}`}
-            anchor="start"
-            color="#475569"
-          />
-          <Legend
-            x={W - 130}
-            y={psy}
-            items={[
-              { color: DC.main, label: `Main Bar φ${mainDia}`, type: "line" },
-              { color: "#f59e0b", label: `Anchor Dowel`, type: "line" },
-              { color: "#475569", label: `Piles ×${np}`, type: "circle" },
-            ]}
-          />
-        </BlueprintSVG>
-      )}
+              <Callout
+                px={pilePosX[0]}
+                py={psy + psh - psh / 3}
+                lx={psx - 12}
+                ly={psy + psh * 0.4}
+                label={`Anchor Dowel (pile)`}
+                anchor="end"
+                color="#f59e0b"
+              />
+              <Callout
+                px={psx + pcov}
+                py={psy + psh / 2}
+                lx={psx + psw + 14}
+                ly={psy + psh * 0.5}
+                label="Cover = 75 mm"
+                anchor="start"
+                color="#64748b"
+              />
+              <Callout
+                px={pilePosX[0]}
+                py={psy + psh + pileStemH / 2}
+                lx={psx + psw + 14}
+                ly={psy + psh + 15}
+                label={`Pile φ${pileDia}mm × ${np}`}
+                anchor="start"
+                color="#475569"
+              />
+              <Legend
+                x={W - 130}
+                y={psy}
+                items={[
+                  { color: DC.main, label: `Main Bar φ${mainDia}`, type: "line" },
+                  { color: "#f59e0b", label: `Anchor Dowel`, type: "line" },
+                  { color: "#475569", label: `Piles ×${np}`, type: "circle" },
+                ]}
+              />
+            </BlueprintSVG>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

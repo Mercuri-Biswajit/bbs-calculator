@@ -17,6 +17,7 @@
 /* Drawing Component CSS */
 @import "./components/drawings/LapSpliceDiagram.css";
 @import "./components/drawings/BlueprintControls.css";
+@import "./components/drawings/BlueprintAnimations.css";
 
 /* Shared Components */
 @import "./components/Navigation.css";

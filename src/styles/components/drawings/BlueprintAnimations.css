@@ -1,0 +1,133 @@
+/* ═══════════════════════════════════════════════════════
+   Blueprint Animations — Supplementary CSS
+   Complements Framer Motion with continuous & hover effects
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Rebar Pulse ── */
+@keyframes rebarPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 0px rgba(192, 57, 43, 0));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 4px rgba(192, 57, 43, 0.5));
+    transform: scale(1.08);
+  }
+}
+
+.rebar-dot-pulse {
+  animation: rebarPulse 2.8s ease-in-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+.rebar-dot-pulse:hover {
+  animation: rebarPulse 0.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(192, 57, 43, 0.8)) !important;
+  cursor: pointer;
+}
+
+/* ── Concrete Shimmer (Hatch Pattern) ── */
+@keyframes concreteShimmer {
+  0% { transform: rotate(45deg) translateX(0); }
+  100% { transform: rotate(45deg) translateX(6px); }
+}
+
+.concrete-shimmer-pattern line {
+  animation: concreteShimmer 4s linear infinite;
+}
+
+/* ── Grid Scan Line ── */
+@keyframes gridScan {
+  0% { transform: translateX(-100%); opacity: 0.6; }
+  50% { opacity: 0.3; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+.grid-scan-line {
+  animation: gridScan 1.8s ease-out forwards;
+  pointer-events: none;
+}
+
+/* ── Hover Glow Effects ── */
+.blueprint-element-hover {
+  transition: filter 0.25s ease, opacity 0.25s ease;
+  cursor: pointer;
+}
+
+.blueprint-element-hover:hover {
+  filter: drop-shadow(0 0 5px rgba(30, 96, 145, 0.45));
+}
+
+/* ── Rebar Line Glow ── */
+.rebar-line-hover:hover {
+  stroke-width: 2.5 !important;
+  filter: drop-shadow(0 0 3px currentColor);
+  transition: all 0.2s ease;
+}
+
+/* ── Callout Hover ── */
+.callout-hover:hover {
+  filter: drop-shadow(0 0 3px rgba(26, 58, 92, 0.3));
+}
+
+.callout-hover:hover text {
+  font-weight: 900 !important;
+}
+
+/* ── Legend Hover ── */
+.legend-hover:hover rect {
+  stroke: #1e6091 !important;
+  stroke-width: 1.2 !important;
+}
+
+/* ── Watermark Text ── */
+@keyframes watermarkFade {
+  0% { opacity: 0; }
+  100% { opacity: 0.08; }
+}
+
+.watermark-text {
+  animation: watermarkFade 1.5s ease-out 0.8s both;
+}
+
+/* ── Dense Zone Pulse ── */
+@keyframes densePulse {
+  0%, 100% { opacity: 0.06; }
+  50% { opacity: 0.12; }
+}
+
+.dense-zone-pulse {
+  animation: densePulse 3s ease-in-out infinite;
+}
+
+/* ── Pile Bounce ── */
+@keyframes pileBounce {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.15); }
+  80% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.pile-bounce {
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+/* ── Soil Wave ── */
+@keyframes soilWave {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(1.5px); }
+}
+
+.soil-wave {
+  animation: soilWave 3.5s ease-in-out infinite;
+  transform-origin: bottom;
+  transform-box: fill-box;
+}
+
+/* ── Title Bar Shimmer ── */
+@keyframes titleShimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}

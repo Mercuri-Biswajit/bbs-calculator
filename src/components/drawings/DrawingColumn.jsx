@@ -1,5 +1,6 @@
 import React from "react";
-import { BlueprintSVG, DC, DimLine, RebarDot, Callout, Legend } from "./DrawingShared.jsx";
+import { motion } from "framer-motion";
+import { BlueprintSVG, DC, DimLine, RebarDot, Callout, Legend, scaleIn, fadeInUp, staggerContainer, popIn } from "./DrawingShared.jsx";
 
 export function DrawingColumn({ B, D, mainDia, mainNos, tieDia, tieSpacing }) {
   const b = +B || 0.3,
@@ -50,7 +51,8 @@ export function DrawingColumn({ B, D, mainDia, mainNos, tieDia, tieSpacing }) {
       height={H}
       title={`COLUMN SECTION & ELEVATION | Cover: 40mm | IS 456`}
     >
-      <rect
+      {/* Concrete body — animated scale-in */}
+      <motion.rect
         x={ox}
         y={oy}
         width={bw}
@@ -58,8 +60,11 @@ export function DrawingColumn({ B, D, mainDia, mainNos, tieDia, tieSpacing }) {
         fill="url(#hatch)"
         stroke={DC.outline}
         strokeWidth="2"
+        variants={scaleIn}
+        style={{ transformOrigin: `${ox + bw / 2}px ${oy + dh / 2}px` }}
       />
-      <rect
+      {/* Stirrup cover zone — draw in */}
+      <motion.rect
         x={ox + cov}
         y={oy + cov}
         width={bw - 2 * cov}
@@ -68,10 +73,16 @@ export function DrawingColumn({ B, D, mainDia, mainNos, tieDia, tieSpacing }) {
         stroke={DC.tie}
         strokeWidth="1.8"
         strokeDasharray="5,2"
+        initial={{ opacity: 0, pathLength: 0 }}
+        animate={{ opacity: 1, pathLength: 1 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
       />
-      {bars.map((p, i) => (
-        <RebarDot key={i} cx={p[0]} cy={p[1]} dia={md} color={DC.main} />
-      ))}
+      {/* Rebar dots — staggered pop-in */}
+      <motion.g variants={staggerContainer} initial="hidden" animate="visible">
+        {bars.map((p, i) => (
+          <RebarDot key={i} cx={p[0]} cy={p[1]} dia={md} color={DC.main} />
+        ))}
+      </motion.g>
       <DimLine
         x1={ox}
         y1={oy + dh}
@@ -89,7 +100,8 @@ export function DrawingColumn({ B, D, mainDia, mainNos, tieDia, tieSpacing }) {
         offset={-18}
         vertical
       />
-      <rect
+      {/* Elevation box — fade in */}
+      <motion.rect
         x={eOx}
         y={oy}
         width={eW}
@@ -97,25 +109,34 @@ export function DrawingColumn({ B, D, mainDia, mainNos, tieDia, tieSpacing }) {
         fill="#e8f4fd"
         stroke={DC.outline}
         strokeWidth="1.5"
+        variants={scaleIn}
       />
-      <line
+      {/* Main bars in elevation */}
+      <motion.line
         x1={eOx + 4}
         y1={oy}
         x2={eOx + 4}
         y2={oy + eH}
         stroke={DC.main}
         strokeWidth="1.5"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
       />
-      <line
+      <motion.line
         x1={eOx + eW - 4}
         y1={oy}
         x2={eOx + eW - 4}
         y2={oy + eH}
         stroke={DC.main}
         strokeWidth="1.5"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.6, delay: 0.45 }}
       />
+      {/* Tie lines — staggered draw-in */}
       {Array.from({ length: nT }).map((_, i) => (
-        <line
+        <motion.line
           key={i}
           x1={eOx}
           y1={oy + i * spPx}
@@ -123,6 +144,10 @@ export function DrawingColumn({ B, D, mainDia, mainNos, tieDia, tieSpacing }) {
           y2={oy + i * spPx}
           stroke={DC.tie}
           strokeWidth="1.5"
+          className="rebar-line-hover"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.5 + i * 0.04 }}
         />
       ))}
       {/* ── watermarks ── */}
@@ -132,6 +157,7 @@ export function DrawingColumn({ B, D, mainDia, mainNos, tieDia, tieSpacing }) {
         textAnchor="middle"
         fill={DC.outline}
         opacity={0.04}
+        className="watermark-text"
         style={{
           fontSize: 12,
           fontFamily: "monospace",
@@ -147,6 +173,7 @@ export function DrawingColumn({ B, D, mainDia, mainNos, tieDia, tieSpacing }) {
         textAnchor="middle"
         fill={DC.outline}
         opacity={0.04}
+        className="watermark-text"
         style={{
           fontSize: 12,
           fontFamily: "monospace",

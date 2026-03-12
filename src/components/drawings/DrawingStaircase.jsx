@@ -1,5 +1,6 @@
 import React from "react";
-import { BlueprintSVG, DC, DimLine, Callout, Legend } from "./DrawingShared.jsx";
+import { motion } from "framer-motion";
+import { BlueprintSVG, DC, DimLine, Callout, Legend, scaleIn, fadeInUp } from "./DrawingShared.jsx";
 
 export function DrawingStaircase({
   flightLen,
@@ -30,7 +31,8 @@ export function DrawingStaircase({
       height={H}
       title={`STAIRCASE — PLAN VIEW  |  Cover: 25mm  |  IS 456`}
     >
-      <rect
+      {/* Waist slab body */}
+      <motion.rect
         x={ox}
         y={oy}
         width={fw}
@@ -38,9 +40,12 @@ export function DrawingStaircase({
         fill="url(#hatch)"
         stroke={DC.outline}
         strokeWidth="2"
+        variants={scaleIn}
+        style={{ transformOrigin: `${ox + fw / 2}px ${oy + ww / 2}px` }}
       />
+      {/* Dist bars — sweep left→right */}
       {dBars.map((x, i) => (
-        <line
+        <motion.line
           key={`d${i}`}
           x1={ox + x}
           y1={oy}
@@ -48,10 +53,15 @@ export function DrawingStaircase({
           y2={oy + ww}
           stroke={DC.dist}
           strokeWidth="1.2"
+          className="rebar-line-hover"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={{ duration: 0.35, delay: 0.3 + i * 0.04 }}
         />
       ))}
+      {/* Main bars — sweep top→bottom */}
       {mBars.map((y, i) => (
-        <line
+        <motion.line
           key={`m${i}`}
           x1={ox}
           y1={oy + y}
@@ -59,12 +69,17 @@ export function DrawingStaircase({
           y2={oy + y}
           stroke={DC.main}
           strokeWidth="1.5"
+          className="rebar-line-hover"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={{ duration: 0.35, delay: 0.2 + i * 0.04 }}
         />
       ))}
+      {/* Step lines — staggered draw */}
       {Array.from({ length: 8 }).map((_, i) => {
         const sx = ox + (fw / 8) * i;
         return (
-          <line
+          <motion.line
             key={`step${i}`}
             x1={sx}
             y1={oy}
@@ -73,7 +88,9 @@ export function DrawingStaircase({
             stroke={DC.outline}
             strokeWidth="0.5"
             strokeDasharray="3,3"
-            opacity="0.3"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 0.3 }}
+            transition={{ duration: 0.3, delay: 0.5 + i * 0.06 }}
           />
         );
       })}
@@ -100,12 +117,13 @@ export function DrawingStaircase({
         y={oy + ww / 2 + 4}
         textAnchor="middle"
         fill={DC.outline}
-        opacity={0.09}
+        className="watermark-text"
         style={{
           fontSize: 14,
           fontFamily: "monospace",
           fontWeight: 900,
           letterSpacing: 3,
+          opacity: 0,
         }}
       >
         STAIRCASE PLAN

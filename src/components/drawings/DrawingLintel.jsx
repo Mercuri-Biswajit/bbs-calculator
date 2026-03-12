@@ -1,5 +1,6 @@
 import React from "react";
-import { BlueprintSVG, DC, DimLine, RebarDot, Callout, Legend } from "./DrawingShared.jsx";
+import { motion } from "framer-motion";
+import { BlueprintSVG, DC, DimLine, RebarDot, Callout, Legend, scaleIn, staggerContainer } from "./DrawingShared.jsx";
 
 export function DrawingLintel({
   L,
@@ -52,7 +53,7 @@ export function DrawingLintel({
       title={`LINTEL${hasChajja ? " + CHAJJA" : ""} — SECTION  |  Cover: 25mm  |  IS 456`}
     >
       {/* Lintel body */}
-      <rect
+      <motion.rect
         x={ox}
         y={oy}
         width={bw}
@@ -60,8 +61,11 @@ export function DrawingLintel({
         fill="url(#hatch)"
         stroke={DC.outline}
         strokeWidth="2"
+        variants={scaleIn}
+        style={{ transformOrigin: `${ox + bw / 2}px ${oy + dh / 2}px` }}
       />
-      <rect
+      {/* Stirrup cover zone */}
+      <motion.rect
         x={ox + cov}
         y={oy + cov}
         width={bw - 2 * cov}
@@ -70,13 +74,22 @@ export function DrawingLintel({
         stroke={DC.tie}
         strokeWidth="1.5"
         strokeDasharray="4,2"
+        initial={{ opacity: 0, pathLength: 0 }}
+        animate={{ opacity: 1, pathLength: 1 }}
+        transition={{ duration: 0.7, delay: 0.3 }}
       />
-      {botXs.map((x, i) => (
-        <RebarDot key={i} cx={x} cy={botY} dia={+botDia} color={DC.main} />
-      ))}
-      {topXs.map((x, i) => (
-        <RebarDot key={i} cx={x} cy={topY} dia={+topDia} color={DC.top} />
-      ))}
+      {/* Bottom bars */}
+      <motion.g variants={staggerContainer} initial="hidden" animate="visible">
+        {botXs.map((x, i) => (
+          <RebarDot key={`b${i}`} cx={x} cy={botY} dia={+botDia} color={DC.main} />
+        ))}
+      </motion.g>
+      {/* Top bars */}
+      <motion.g variants={staggerContainer} initial="hidden" animate="visible">
+        {topXs.map((x, i) => (
+          <RebarDot key={`t${i}`} cx={x} cy={topY} dia={+topDia} color={DC.top} />
+        ))}
+      </motion.g>
       <DimLine
         x1={ox}
         y1={oy + dh}
@@ -95,9 +108,14 @@ export function DrawingLintel({
         vertical
       />
 
-      {/* Chajja */}
+      {/* Chajja — extends outward */}
       {hasChajja && (
-        <g>
+        <motion.g
+          initial={{ scaleX: 0, opacity: 0 }}
+          animate={{ scaleX: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 18, delay: 0.5 }}
+          style={{ transformOrigin: `${ox + bw}px ${oy + dh / 2}px` }}
+        >
           <rect
             x={ox + bw}
             y={oy}
@@ -133,11 +151,11 @@ export function DrawingLintel({
             label={`${chajjaL || 0.6}m`}
             offset={16}
           />
-        </g>
+        </motion.g>
       )}
 
       {/* Elevation */}
-      <rect
+      <motion.rect
         x={eX}
         y={oy}
         width={eW}
@@ -145,25 +163,34 @@ export function DrawingLintel({
         fill="#e8f4fd"
         stroke={DC.outline}
         strokeWidth="1.5"
+        variants={scaleIn}
       />
-      <line
+      {/* Main bars in elevation */}
+      <motion.line
         x1={eX + 3}
         y1={oy}
         x2={eX + 3}
         y2={oy + dh}
         stroke={DC.main}
         strokeWidth="1.5"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
       />
-      <line
+      <motion.line
         x1={eX + eW - 3}
         y1={oy}
         x2={eX + eW - 3}
         y2={oy + dh}
         stroke={DC.main}
         strokeWidth="1.5"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.6, delay: 0.45 }}
       />
+      {/* Stirrups — sequential draw */}
       {stirrupYs.map((y, i) => (
-        <line
+        <motion.line
           key={i}
           x1={eX + 2}
           y1={oy + y}
@@ -171,7 +198,10 @@ export function DrawingLintel({
           y2={oy + y}
           stroke={DC.tie}
           strokeWidth="1.2"
-          opacity={0.8}
+          className="rebar-line-hover"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 0.8 }}
+          transition={{ duration: 0.25, delay: 0.5 + i * 0.04 }}
         />
       ))}
       <DimLine
@@ -182,23 +212,24 @@ export function DrawingLintel({
         label={`${l}m`}
         offset={16}
       />
-      {/* ── watermark ── */}
+      {/* watermark */}
       <text
         x={ox + bw / 2}
         y={oy + dh / 2 + 4}
         textAnchor="middle"
         fill={DC.outline}
-        opacity={0.1}
+        className="watermark-text"
         style={{
           fontSize: 12,
           fontFamily: "monospace",
           fontWeight: 900,
           letterSpacing: 2,
+          opacity: 0,
         }}
       >
         SECTION
       </text>
-      {/* ── callouts ── */}
+      {/* callouts */}
       <Callout
         px={botXs[0]}
         py={botY}

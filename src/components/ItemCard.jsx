@@ -73,19 +73,35 @@ export function ItemCard({ item, type, onChange, onRemove, index }) {
             <Form item={item} onChange={onChange} />
           </div>
           {showDrawing && (
-            <div className="item-card__drawing-panel">
-              <div style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "var(--primary-dark)", textTransform: "uppercase", letterSpacing: "1.2px", fontFamily: "var(--font-mono)" }}>
-                    📐 Live Blueprint
-                  </span>
-                  <span style={{ fontSize: 10, color: "var(--text-3)", marginTop: 4 }}>
-                    Auto-calculated diagram
-                  </span>
-                </div>
+            <div className="item-card__drawing-panel" style={{ position: "relative", minHeight: "360px" }}>
+              <div style={{ 
+                position: "absolute", 
+                top: "16px", 
+                left: "20px", 
+                zIndex: 20, 
+                display: "flex", 
+                alignItems: "center", 
+                gap: "5px",
+                background: "rgba(255, 255, 255, 0.7)", 
+                padding: "2px 8px", 
+                borderRadius: "20px", 
+                border: "1px solid rgba(30, 96, 145, 0.15)", 
+                backdropFilter: "blur(4px)", 
+                boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                pointerEvents: "none" 
+              }}>
+                <div style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--primary)", boxShadow: "0 0 4px var(--primary)" }} />
+                <span style={{ fontSize: 7.5, fontWeight: 900, color: "var(--primary-dark)", textTransform: "uppercase", letterSpacing: "0.8px", fontFamily: "var(--font-mono)" }}>
+                  Live Blueprint
+                </span>
+                <span style={{ fontSize: 7.5, color: "var(--text-3)", marginLeft: 2, opacity: 0.7 }}>
+                  (Auto)
+                </span>
               </div>
 
-              {getDrawing(type, item)}
+              <div style={{ transform: "scale(0.9)", transformOrigin: "center center", width: "100%" }}>
+                {getDrawing(type, item)}
+              </div>
             </div>
           )}
         </div>

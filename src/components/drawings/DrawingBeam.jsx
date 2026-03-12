@@ -1,5 +1,6 @@
 import React from "react";
-import { BlueprintSVG, DC, DimLine, RebarDot, Callout, Legend } from "./DrawingShared.jsx";
+import { motion } from "framer-motion";
+import { BlueprintSVG, DC, DimLine, RebarDot, Callout, Legend, scaleIn, fadeInUp, staggerContainer } from "./DrawingShared.jsx";
 
 export function DrawingBeam({
   B,
@@ -37,7 +38,6 @@ export function DrawingBeam({
 
   const eX = ox + bw + 28,
     eW = 60;
-  const denseW = eW * 0.25;
 
   const normalSpPx = Math.max(10, (+stirSpacing / 1000) * scale);
   const denseSpPx = normalSpPx / 2;
@@ -64,7 +64,8 @@ export function DrawingBeam({
       height={H}
       title={`BEAM — CROSS-SECTION + STIRRUP ZONES  |  Cover: ${coverType === "wallBeam" ? 25 : 40}mm`}
     >
-      <rect
+      {/* Concrete body — scale-in */}
+      <motion.rect
         x={ox}
         y={oy}
         width={bw}
@@ -72,8 +73,11 @@ export function DrawingBeam({
         fill="url(#hatch)"
         stroke={DC.outline}
         strokeWidth="2"
+        variants={scaleIn}
+        style={{ transformOrigin: `${ox + bw / 2}px ${oy + dh / 2}px` }}
       />
-      <rect
+      {/* Stirrup cover zone */}
+      <motion.rect
         x={ox + cov}
         y={oy + cov}
         width={bw - 2 * cov}
@@ -82,13 +86,22 @@ export function DrawingBeam({
         stroke={DC.tie}
         strokeWidth="1.8"
         strokeDasharray="5,2"
+        initial={{ opacity: 0, pathLength: 0 }}
+        animate={{ opacity: 1, pathLength: 1 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
       />
-      {botXs.map((x, i) => (
-        <RebarDot key={i} cx={x} cy={botY} dia={+botDia} color={DC.main} />
-      ))}
-      {topXs.map((x, i) => (
-        <RebarDot key={i} cx={x} cy={topY} dia={+topDia} color={DC.top} />
-      ))}
+      {/* Bottom bars — staggered pop */}
+      <motion.g variants={staggerContainer} initial="hidden" animate="visible">
+        {botXs.map((x, i) => (
+          <RebarDot key={`b${i}`} cx={x} cy={botY} dia={+botDia} color={DC.main} />
+        ))}
+      </motion.g>
+      {/* Top bars — staggered pop */}
+      <motion.g variants={staggerContainer} initial="hidden" animate="visible">
+        {topXs.map((x, i) => (
+          <RebarDot key={`t${i}`} cx={x} cy={topY} dia={+topDia} color={DC.top} />
+        ))}
+      </motion.g>
       <DimLine
         x1={ox}
         y1={oy + dh}
@@ -108,7 +121,7 @@ export function DrawingBeam({
       />
 
       {/* Elevation box */}
-      <rect
+      <motion.rect
         x={eX}
         y={oy}
         width={eW}
@@ -116,61 +129,84 @@ export function DrawingBeam({
         fill="#e8f4fd"
         stroke={DC.outline}
         strokeWidth="1.5"
+        variants={scaleIn}
       />
-      {/* Dense zone shading — each end */}
-      <rect
+      {/* Dense zone shading — pulsing */}
+      <motion.rect
         x={eX}
         y={oy}
         width={eW}
         height={denseZoneH}
         fill="rgba(220,38,38,.08)"
         stroke="none"
+        className="dense-zone-pulse"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.4 }}
       />
-      <rect
+      <motion.rect
         x={eX}
         y={oy + dh - denseZoneH}
         width={eW}
         height={denseZoneH}
         fill="rgba(220,38,38,.08)"
         stroke="none"
+        className="dense-zone-pulse"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.55, duration: 0.4 }}
       />
       {/* Zone labels */}
-      <text
+      <motion.text
         x={eX + eW / 2}
         y={oy - 3}
         textAnchor="middle"
         fill="#dc2626"
         style={{ fontSize: 10, fontFamily: "monospace" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6 }}
       >
         DENSE
-      </text>
-      <text
+      </motion.text>
+      <motion.text
         x={eX + eW / 2}
         y={oy + dh / 2}
         textAnchor="middle"
         fill="#059669"
         style={{ fontSize: 10, fontFamily: "monospace" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.65 }}
       >
         NORMAL
-      </text>
-      <line
+      </motion.text>
+      {/* Main bars in elevation */}
+      <motion.line
         x1={eX + 3}
         y1={oy}
         x2={eX + 3}
         y2={oy + dh}
         stroke={DC.main}
         strokeWidth="1.5"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.6, delay: 0.35 }}
       />
-      <line
+      <motion.line
         x1={eX + eW - 3}
         y1={oy}
         x2={eX + eW - 3}
         y2={oy + dh}
         stroke={DC.main}
         strokeWidth="1.5"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
       />
+      {/* Stirrup lines — staggered draw */}
       {stirrupYs.map((s, i) => (
-        <line
+        <motion.line
           key={i}
           x1={eX + 2}
           y1={s.y}
@@ -178,15 +214,20 @@ export function DrawingBeam({
           y2={s.y}
           stroke={s.dense ? "#dc2626" : DC.tie}
           strokeWidth={s.dense ? 1.5 : 1.2}
-          opacity={0.85}
+          className="rebar-line-hover"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 0.85 }}
+          transition={{ duration: 0.25, delay: 0.45 + i * 0.03 }}
         />
       ))}
+      {/* Watermark */}
       <text
         x={ox + bw / 2}
         y={oy + dh / 2 + 4}
         textAnchor="middle"
         fill={DC.outline}
         opacity={0.1}
+        className="watermark-text"
         style={{
           fontSize: 12,
           fontFamily: "monospace",
@@ -196,6 +237,7 @@ export function DrawingBeam({
       >
         SECTION
       </text>
+      {/* Callouts */}
       <Callout
         px={botXs[0]}
         py={botY}

@@ -122,12 +122,14 @@
 }
 
 .element-chip:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  background: var(--surface-3);
 }
 
 .element-chip.active {
-  background: var(--navy-800);
+  background: var(--primary);
   border-color: transparent;
+  box-shadow: 0 4px 12px var(--primary-light);
 }
 
 .element-chip.active .element-chip__name {
@@ -135,13 +137,15 @@
 }
 
 .element-chip.active .element-chip__meta {
-  color: rgba(255, 255, 255, 0.5) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
 .element-chip:not(.active) {
-  background: var(--surface-2);
-  border-color: var(--border-2);
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  backdrop-filter: var(--glass-blur);
 }
+
 
 .element-chip__name {
   font-size: 12px;
@@ -171,8 +175,9 @@
 }
 
 .nav-prev:hover {
-  box-shadow: var(--shadow);
-  transform: translateX(-2px);
+  box-shadow: var(--shadow-md);
+  transform: translateX(-3px);
+  background: var(--surface-2);
 }
 
 .nav-next {
@@ -186,12 +191,15 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
+  background: var(--primary);
+  box-shadow: 0 4px 12px var(--primary-light);
   transition: all var(--transition);
   font-family: var(--font-display);
 }
 
 .nav-next:hover {
-  transform: translateX(2px);
-  filter: brightness(1.1);
+  transform: translateX(3px);
+  background: var(--primary-hover);
+  box-shadow: 0 6px 16px var(--primary-light);
 }
+

@@ -5,17 +5,17 @@
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   box-shadow: var(--glass-shadow);
   overflow: hidden;
-  transition: all var(--transition-slow);
+  transition: all var(--transition);
 }
 
 .card:hover {
   background: var(--glass-bg-hover);
-  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
+
 
 .card__header {
   padding: 16px 24px;

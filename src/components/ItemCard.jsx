@@ -99,7 +99,7 @@ export function ItemCard({ item, type, onChange, onRemove, index }) {
                 </span>
               </div>
 
-              <div style={{ transform: "scale(0.9)", transformOrigin: "center center", width: "100%" }}>
+              <div style={{ transform: "scale(0.65)", transformOrigin: "center center", width: "100%" }}>
                 {getDrawing(type, item)}
               </div>
             </div>

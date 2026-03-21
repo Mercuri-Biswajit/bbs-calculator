@@ -5,7 +5,7 @@
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid var(--glass-border);
-  padding: 0 36px;
+  padding: 0 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -13,8 +13,9 @@
   top: 0;
   z-index: 200;
   box-shadow: var(--shadow-sm);
-  gap: 10px;
+  gap: 12px;
 }
+
 
 @media (max-width: 600px) {
   .header {

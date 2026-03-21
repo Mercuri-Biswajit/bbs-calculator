@@ -212,6 +212,111 @@ export default function ReportsHistory({ onLoadReport, onNewProject }) {
         className="page-pad"
         style={{ maxWidth: 1400, margin: "0 auto", paddingTop: 0 }}
       >
+        {/* ── ANALYTICS GRID ── */}
+        {!loading && reports.length > 0 && (() => {
+          const totalWt = reports.reduce((s, r) => s + (r.allRows?.reduce((a, row) => a + row.weight, 0) || 0), 0);
+          const totalCost = reports.reduce((s, r) => s + (r.costs?.reduce((a, row) => a + row.cost, 0) || 0), 0);
+          const diaMap = {};
+          reports.forEach(r => {
+            (r.allRows || []).forEach(row => {
+              diaMap[row.dia] = (diaMap[row.dia] || 0) + row.weight;
+            });
+          });
+          const maxDiaWt = Math.max(...Object.values(diaMap), 1);
+          
+          return (
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: 16,
+              marginBottom: 24,
+            }}>
+              {/* Stat Card: Projects */}
+              <div style={{
+                background: "var(--glass-bg)",
+                backdropFilter: "var(--glass-blur)",
+                border: "1px solid var(--glass-border)",
+                borderRadius: "var(--radius-lg)",
+                padding: "20px 24px",
+                boxShadow: "var(--shadow)",
+              }}>
+                <div style={{ fontSize: 10, color: "var(--text-4)", fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>
+                  Total Projects
+                </div>
+                <div style={{ fontSize: 32, fontWeight: 800, color: "var(--primary)", marginTop: 6, fontFamily: "var(--font-display)" }}>
+                  {reports.length}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-3)", fontFamily: "var(--font-mono)", marginTop: 2 }}>
+                  saved reports
+                </div>
+              </div>
+
+              {/* Stat Card: Steel Weight */}
+              <div style={{
+                background: "var(--glass-bg)",
+                backdropFilter: "var(--glass-blur)",
+                border: "1px solid var(--glass-border)",
+                borderRadius: "var(--radius-lg)",
+                padding: "20px 24px",
+                boxShadow: "var(--shadow)",
+              }}>
+                <div style={{ fontSize: 10, color: "var(--text-4)", fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>
+                  Total Steel
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: "var(--danger)", marginTop: 6, fontFamily: "var(--font-display)" }}>
+                  {totalWt >= 1000 ? `${(totalWt / 1000).toFixed(2)} t` : `${totalWt.toFixed(1)} kg`}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-3)", fontFamily: "var(--font-mono)", marginTop: 2 }}>
+                  estimated weight
+                </div>
+              </div>
+
+              {/* Stat Card: Cost */}
+              <div style={{
+                background: "var(--glass-bg)",
+                backdropFilter: "var(--glass-blur)",
+                border: "1px solid var(--glass-border)",
+                borderRadius: "var(--radius-lg)",
+                padding: "20px 24px",
+                boxShadow: "var(--shadow)",
+              }}>
+                <div style={{ fontSize: 10, color: "var(--text-4)", fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>
+                  Total Value
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: "var(--success)", marginTop: 6, fontFamily: "var(--font-display)" }}>
+                  ₹{totalCost >= 100000 ? `${(totalCost / 100000).toFixed(2)}L` : totalCost.toLocaleString("en-IN")}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-3)", fontFamily: "var(--font-mono)", marginTop: 2 }}>
+                  estimated cost
+                </div>
+              </div>
+
+              {/* Stat Card: Weight by Diameter */}
+              <div style={{
+                background: "var(--glass-bg)",
+                backdropFilter: "var(--glass-blur)",
+                border: "1px solid var(--glass-border)",
+                borderRadius: "var(--radius-lg)",
+                padding: "20px 24px",
+                boxShadow: "var(--shadow)",
+              }}>
+                <div style={{ fontSize: 10, color: "var(--text-4)", fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: 10 }}>
+                  Weight by Diameter
+                </div>
+                {Object.entries(diaMap).sort(([a],[b]) => +a - +b).map(([dia, wt]) => (
+                  <div key={dia} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
+                    <span style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--text-3)", width: 40, fontWeight: 600 }}>φ{dia}</span>
+                    <div style={{ flex: 1, height: 6, borderRadius: 3, background: "var(--surface-3)", overflow: "hidden" }}>
+                      <div style={{ width: `${(wt / maxDiaWt) * 100}%`, height: "100%", borderRadius: 3, background: "var(--primary)", transition: "width 0.5s ease" }} />
+                    </div>
+                    <span style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--text-2)", width: 50, textAlign: "right", fontWeight: 600 }}>{wt.toFixed(0)}kg</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
         {loading && (
           <div
             style={{

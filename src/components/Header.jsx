@@ -1,6 +1,28 @@
 // src/components/Header.jsx
 
-import logo from "../assets/icons/My__Logo.png";
+import { useState, useEffect } from "react";
+
+function ThemeToggle() {
+  const [dark, setDark] = useState(() => {
+    try { return localStorage.getItem("bbs_theme") === "dark"; } catch { return false; }
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+    try { localStorage.setItem("bbs_theme", dark ? "dark" : "light"); } catch {}
+  }, [dark]);
+
+  return (
+    <button
+      onClick={() => setDark((d) => !d)}
+      className="btn btn--secondary btn--sm"
+      title={dark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+      style={{ fontSize: 16, padding: "6px 10px", lineHeight: 1 }}
+    >
+      {dark ? "☀️" : "🌙"}
+    </button>
+  );
+}
 
 export default function Header({
   onGenerateReport,
@@ -14,11 +36,11 @@ export default function Header({
       <div className="hdr-logo-placeholder" />
 
       <nav className="hdr-nav" style={{ alignItems: "center", gap: 4 }}>
-
         <span className="hdr-nav__pill">Bar Bending Schedule</span>
       </nav>
 
       <div className="header__actions">
+        <ThemeToggle />
         <button
           onClick={onGenerateReport}
           className="btn btn--primary btn--md"

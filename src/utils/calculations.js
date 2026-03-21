@@ -127,23 +127,48 @@ export function calcSingleColumn({
   mainNos,
   tieDia,
   tieSpacing,
+  shape,
+  colDia,
 }) {
-  const h = parseFloat(H),
-    b = parseFloat(B),
-    d = parseFloat(D);
+  const h = parseFloat(H);
   const md = +mainDia,
     td = +tieDia;
-  const cov = COVER_MM.column / 1000;
   const sp = parseFloat(tieSpacing) / 1000;
-
-  const nTies = Math.ceil(h / sp) + 1;
+  const isCircular = shape === "circular";
 
   // FIX #2 — Column main bars: add lap at TOP only (column-to-column splice).
-  // The bottom anchorage into the footing is handled by the starter/dowel bars
-  // in calcSingleFooting. Adding lapLen at both ends was double-counting steel.
   const mainLen = h + lapLen(md);
 
-  // FIX #1 — pass actual tieDia to stirrupPerim (already correct, kept)
+  if (isCircular) {
+    const dia = parseFloat(colDia) || 0.3;
+    const cov = COVER_MM.column / 1000;
+    const nSpirals = Math.ceil(h / sp) + 1;
+    // Spiral tie = circumference of circle at (D - 2*cover) + 2 hooks
+    const spiralPerim = Math.PI * (dia - 2 * cov) + 2 * hookLen(td);
+    return [
+      {
+        mark: "A",
+        desc: `Main Bars (φ${md}mm) — Circular Φ${(dia * 1000).toFixed(0)}mm`,
+        nos: +mainNos,
+        cutLen: +mainLen.toFixed(3),
+        dia: md,
+      },
+      {
+        mark: "B",
+        desc: `Spiral Ties (φ${td}mm @${tieSpacing}mm pitch) [IS 456 Cl.26.5.3.2]`,
+        nos: nSpirals,
+        cutLen: +spiralPerim.toFixed(3),
+        dia: td,
+      },
+    ];
+  }
+
+  // Rectangular
+  const b = parseFloat(B),
+    d = parseFloat(D);
+  const cov = COVER_MM.column / 1000;
+  const nTies = Math.ceil(h / sp) + 1;
+  // FIX #1 — pass actual tieDia to stirrupPerim
   const tieLen = stirrupPerim(b, d, cov, td);
 
   return [
@@ -163,6 +188,7 @@ export function calcSingleColumn({
     },
   ];
 }
+
 
 // ─── BEAM ─────────────────────────────────────────────────────────────────────
 export function calcSingleBeam(

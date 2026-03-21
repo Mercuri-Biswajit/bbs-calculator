@@ -126,6 +126,16 @@
   overflow: hidden;
 }
 
+/* Dark mode overrides for ItemCard */
+[data-theme="dark"] .item-card__drawing-panel {
+  background: linear-gradient(135deg, #162032 0%, #1a2744 100%);
+}
+
+[data-theme="dark"] .item-card__header {
+  background: #0f172a;
+}
+
+
 .item-card__drawing-label {
   font-size: 9px;
   font-family: var(--font-mono);

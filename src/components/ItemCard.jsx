@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Card, Badge, Button } from "./ui.jsx";
 import { getForm } from "./forms/index.js";
-import { getDrawing } from "./drawings/index.js";
+import { getDrawing } from "./drawings/index.jsx";
 
 const TYPE_COLORS = {
   footing: "orange",

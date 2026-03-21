@@ -2,7 +2,68 @@ import React from "react";
 import { motion } from "framer-motion";
 import { BlueprintSVG, DC, DimLine, RebarDot, Callout, Legend, scaleIn, fadeInUp, staggerContainer, popIn } from "./DrawingShared.jsx";
 
-export function DrawingColumn({ B, D, mainDia, mainNos, tieDia, tieSpacing }) {
+export function DrawingColumn({ B, D, mainDia, mainNos, tieDia, tieSpacing, shape, colDia }) {
+  const isCircular = shape === "circular";
+
+  // ── CIRCULAR COLUMN ──
+  if (isCircular) {
+    const dia = (+colDia || 0.3);
+    const md = +mainDia, nos = +mainNos || 6, td = +tieDia;
+    const W = 420, H = 300, scale = 210;
+    const r = Math.min(dia * scale, 130) / 2;
+    const cx = W * 0.38, cy = H / 2 + 20;
+    const cov = (40 / 1000) * scale;
+    const rInner = r - cov;
+
+    // Distribute bars around circle
+    const bars = [];
+    for (let i = 0; i < nos; i++) {
+      const angle = (2 * Math.PI * i) / nos - Math.PI / 2;
+      bars.push([cx + rInner * Math.cos(angle), cy + rInner * Math.sin(angle)]);
+    }
+
+    // Elevation
+    const eOx = cx + r + 36, eW = 24, eH = H - 100;
+    const spPx = Math.max(10, (+tieSpacing / 1000) * scale);
+    const nT = Math.ceil(eH / spPx) + 1;
+    const eOy = (H - eH) / 2 + 20;
+
+    return (
+      <BlueprintSVG width={W} height={H} title={`CIRCULAR COLUMN | Φ${(dia*1000).toFixed(0)}mm | Cover: 40mm | IS 456`}>
+        {/* Concrete circle */}
+        <motion.circle cx={cx} cy={cy} r={r} fill="url(#hatch)" stroke={DC.outline} strokeWidth="2" variants={scaleIn} style={{ transformOrigin: `${cx}px ${cy}px` }} />
+        {/* Spiral tie circle */}
+        <motion.circle cx={cx} cy={cy} r={rInner} fill="none" stroke={DC.tie} strokeWidth="1.8" strokeDasharray="6,3"
+          initial={{ opacity: 0, pathLength: 0 }} animate={{ opacity: 1, pathLength: 1 }} transition={{ duration: 0.8, delay: 0.3 }} />
+        {/* Rebar dots */}
+        <motion.g variants={staggerContainer} initial="hidden" animate="visible">
+          {bars.map((p, i) => <RebarDot key={i} cx={p[0]} cy={p[1]} dia={md} color={DC.main} />)}
+        </motion.g>
+        {/* Diameter dimension */}
+        <DimLine x1={cx - r} y1={cy + r} x2={cx + r} y2={cy + r} label={`Φ${(dia*1000).toFixed(0)}mm`} offset={18} />
+        {/* Elevation */}
+        <motion.rect x={eOx} y={eOy} width={eW} height={eH} fill="#e8f4fd" stroke={DC.outline} strokeWidth="1.5" variants={scaleIn} />
+        <motion.line x1={eOx+4} y1={eOy} x2={eOx+4} y2={eOy+eH} stroke={DC.main} strokeWidth="1.5"
+          initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.6, delay: 0.4 }} />
+        <motion.line x1={eOx+eW-4} y1={eOy} x2={eOx+eW-4} y2={eOy+eH} stroke={DC.main} strokeWidth="1.5"
+          initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.6, delay: 0.45 }} />
+        {Array.from({ length: nT }).map((_, i) => (
+          <motion.line key={i} x1={eOx} y1={eOy+i*spPx} x2={eOx+eW} y2={eOy+i*spPx} stroke={DC.tie} strokeWidth="1.5"
+            initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.5 + i * 0.04 }} />
+        ))}
+        <Callout px={bars[0][0]} py={bars[0][1]} lx={20} ly={cy-r-15} label={`Main φ${md}mm × ${nos}`} anchor="start" color={DC.main} />
+        <Callout px={cx+rInner*0.7} py={cy-rInner*0.7} lx={W-20} ly={cy-r-15} label={`Spiral φ${td}mm @${tieSpacing}mm`} anchor="end" color={DC.tie} />
+        <Legend x={eOx+eW+12} y={eOy} items={[
+          { color: DC.main, label: `φ${md}mm × ${nos}`, type: "circle" },
+          { color: DC.tie, label: `Spiral φ${td}@${tieSpacing}`, type: "line", dashed: true },
+        ]} />
+      </BlueprintSVG>
+    );
+  }
+
+  // ── RECTANGULAR COLUMN (original) ──
+
   const b = +B || 0.3,
     d = +D || 0.3,
     md = +mainDia,
